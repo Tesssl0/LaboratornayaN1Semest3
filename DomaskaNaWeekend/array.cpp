@@ -6,7 +6,7 @@ using namespace std;
 void init(Array& arr, int initialCapacity) {
     arr.capacity = initialCapacity;
     arr.size = 0;
-    arr.data = new int[arr.capacity];
+    arr.data = new string[arr.capacity];
 }
 
 // Освобождение памяти
@@ -20,7 +20,7 @@ void destroy(Array& arr) {
 // Увеличение размера массива
 void resize(Array& arr) {
     arr.capacity *= 2;
-    int* newData = new int[arr.capacity];
+    string* newData = new string[arr.capacity];
     for (int i = 0; i < arr.size; i++) {
         newData[i] = arr.data[i];
     }
@@ -29,7 +29,7 @@ void resize(Array& arr) {
 }
 
 // Добавление элемента в конец
-void add(Array& arr, int value) {
+void add(Array& arr, const string& value) {
     if (arr.size == arr.capacity) {
         resize(arr);
     }
@@ -37,7 +37,7 @@ void add(Array& arr, int value) {
 }
 
 // Добавление элемента по индексу
-void addAt(Array& arr, int index, int value) {
+void addAt(Array& arr, int index, const string& value) {
     if (arr.size == arr.capacity) {
         resize(arr);
     }
@@ -49,7 +49,7 @@ void addAt(Array& arr, int index, int value) {
 }
 
 // Получение элемента по индексу
-int get(const Array& arr, int index) {
+string get(const Array& arr, int index) {
     return arr.data[index];
 }
 
@@ -62,7 +62,7 @@ void remove(Array& arr, int index) {
 }
 
 // Замена элемента по индексу
-void set(Array& arr, int index, int value) {
+void set(Array& arr, int index, const string& value) {
     arr.data[index] = value;
 }
 

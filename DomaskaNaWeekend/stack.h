@@ -2,8 +2,10 @@
 #ifndef STACK_H
 #define STACK_H
 
+#include <string>
+
 struct Stack {
-    int* arr;       // массив для хранения элементов стека
+    std::string* arr;       // массив для хранения элементов стека
     int capacity;   // максимальный размер стека
     int topIndex;   // индекс вершины стека
     bool silent;    // флаг тихого режима
@@ -15,13 +17,13 @@ struct Stack {
     ~Stack();
 
     // Добавление элемента в стек
-    void push(int value);
+    void push(const std::string& value);
 
     // Удаление элемента из стека
     void pop();
 
     // Просмотр верхнего элемента
-    int top();
+    std::string top();
 
     // Проверка, пуст ли стек
     bool isEmpty();

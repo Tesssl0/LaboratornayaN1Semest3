@@ -1,31 +1,27 @@
 #ifndef listTwo_H
 #define listTwo_H
 
+#include <string>
+
 struct DoublyNode {
-    int node;
+    std::string node;
     DoublyNode* next;
-    DoublyNode* prev;  // новый указатель на предыдущий узел
+    DoublyNode* prev;
 };
 
 struct ForwardListTwo {
     DoublyNode* head;
-    DoublyNode* tail; // для удобной вставки в конец
+    DoublyNode* tail;
 };
 
-enum PositionTwo {HEADTwo, TAILTwo, AFTERTwo, BEFORETwo};
+enum PositionTwo { HEADTwo, TAILTwo, AFTERTwo, BEFORETwo };
 
-void addNodeTwo(ForwardListTwo* flist, DoublyNode* target, int num, PositionTwo pos);
-
-void deleteNodeTwo(ForwardListTwo* flist, DoublyNode* target, int num, PositionTwo pos);
-
-bool deleteNodeIndexTwo(ForwardListTwo* flist, int num);
-
-bool findNodeIndexTwo(ForwardListTwo* flist, int num);
-
+void addNodeTwo(ForwardListTwo* flist, DoublyNode* target, const std::string& num, PositionTwo pos);
+void deleteNodeTwo(ForwardListTwo* flist, DoublyNode* target, const std::string& num, PositionTwo pos);
+bool deleteNodeIndexTwo(ForwardListTwo* flist, const std::string& num);
+bool findNodeIndexTwo(ForwardListTwo* flist, const std::string& num);
 void printListTwo(const ForwardListTwo& flist);
-
 int countNodesTwo(const ForwardListTwo& flist);
-
 DoublyNode* getNodeByIndexTwo(ForwardListTwo& flist, int index);
 
 #endif

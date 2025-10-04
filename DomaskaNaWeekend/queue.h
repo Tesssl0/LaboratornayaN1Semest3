@@ -3,9 +3,10 @@
 #define QUEUE_H
 
 #include <iostream>
+#include <string>
 using namespace std;
 
-template<typename T>
+template<typename T = string>
 class Queue {
 private:
     T* arr;
@@ -13,7 +14,7 @@ private:
     int frontIndex;
     int rearIndex;
     int size;
-    bool silent; // флаг для тихого режима
+    bool silent;
 
 public:
     Queue(int cap = 10, bool silentMode = false) {
@@ -22,7 +23,7 @@ public:
         frontIndex = 0;
         rearIndex = -1;
         size = 0;
-        silent = silentMode; // устанавливаем режим
+        silent = silentMode;
     }
 
     ~Queue() {
@@ -80,7 +81,6 @@ public:
         return size == 0;
     }
 
-    // Метод для получения размера очереди
     int getSize() {
         return size;
     }

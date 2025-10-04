@@ -2,19 +2,18 @@
 #include"list.h"
 using namespace std;
 
-
-void addNode(ForwardList* flist, linkedList* target, int num, Position pos) {
+void addNode(ForwardList* flist, linkedList* target, const string& num, Position pos) {
     linkedList* newNode = new linkedList;
     newNode->node = num;
     newNode->next = nullptr;
 
     switch (pos) {
-    case HEAD: // вставка в начало
+    case HEAD:
         newNode->next = flist->head;
         flist->head = newNode;
         break;
 
-    case TAIL: // вставка в хвост
+    case TAIL:
         if (flist->head == nullptr) {
             flist->head = newNode;
         }
@@ -27,23 +26,21 @@ void addNode(ForwardList* flist, linkedList* target, int num, Position pos) {
         }
         break;
 
-    case AFTER: // вставка после узла target
+    case AFTER:
         if (target != nullptr) {
             newNode->next = target->next;
             target->next = newNode;
         }
         break;
 
-    case BEFORE: // вставка до узла target
+    case BEFORE:
         if (target != nullptr) {
-            // если вставка перед головой
             if (target == flist->head) {
                 newNode->next = flist->head;
                 flist->head = newNode;
             }
             else {
                 linkedList* current = flist->head;
-                // находим узел перед target
                 while (current->next != nullptr && current->next != target) {
                     current = current->next;
                 }
@@ -57,13 +54,11 @@ void addNode(ForwardList* flist, linkedList* target, int num, Position pos) {
     }
 }
 
-void deleteNode(ForwardList* flist, linkedList* target, int num, Position pos) {
-    linkedList* newNode = new linkedList;
-    newNode->node = num;
-    newNode->next = nullptr;
+void deleteNode(ForwardList* flist, linkedList* target, const string& num, Position pos) {
+    linkedList* toDelete;
 
     switch (pos) {
-    case HEAD: // удаление начало
+    case HEAD: // удаление начала
         if (flist->head != nullptr)
         {
             linkedList* temp = flist->head;
@@ -72,7 +67,7 @@ void deleteNode(ForwardList* flist, linkedList* target, int num, Position pos) {
         }
         break;
 
-    case TAIL: // удаление хвост 
+    case TAIL: // удаление хвоста 
         if (flist->head->next == nullptr) {
             delete flist->head;
             flist->head = nullptr;
@@ -100,10 +95,8 @@ void deleteNode(ForwardList* flist, linkedList* target, int num, Position pos) {
         break;
 
     case BEFORE: // удаление до узла target
-        linkedList* toDelete;
-
         if (target != nullptr) {
-            // если удаление перед головой  
+            // если удаление первого элемента  
             if (target == flist->head) {
                 break;
             }
@@ -134,11 +127,9 @@ void deleteNode(ForwardList* flist, linkedList* target, int num, Position pos) {
         }
         break;
     }
-
 }
 
-bool deleteNodeIndex(ForwardList* flist, int num) {
-
+bool deleteNodeIndex(ForwardList* flist, const string& num) {
     linkedList* toDelete;
     linkedList* current = flist->head;
     if (flist->head == nullptr)
@@ -159,7 +150,6 @@ bool deleteNodeIndex(ForwardList* flist, int num) {
             toDelete = current->next;
             if (current->next->node == num)
             {
-
                 current->next = current->next->next;
                 delete toDelete;
                 return true;
@@ -167,15 +157,13 @@ bool deleteNodeIndex(ForwardList* flist, int num) {
             else
             {
                 current = current->next;
-
             }
         }
         return false;
     }
 }
 
-bool findNodeIndex(ForwardList* flist, int num) {
-
+bool findNodeIndex(ForwardList* flist, const string& num) {
     if (flist->head == nullptr) {
         return false;
     }
@@ -195,7 +183,6 @@ bool findNodeIndex(ForwardList* flist, int num) {
     return false;
 }
 
-
 void printList(const ForwardList& flist) {
     linkedList* current = flist.head;
     cout << "spisok: ";
@@ -206,7 +193,6 @@ void printList(const ForwardList& flist) {
     cout << endl;
 }
 
-// Подсчёт количества узлов в списке
 int countNodes(const ForwardList& flist) {
     int count = 0;
     linkedList* current = flist.head;
@@ -217,19 +203,18 @@ int countNodes(const ForwardList& flist) {
     return count;
 }
 
-// Получение указателя на узел по индексу
 linkedList* getNodeByIndex(const ForwardList& flist, int index) {
-    if (index < 0) return nullptr; // индекс не может быть отрицательным
+    if (index < 0) return nullptr;
 
     linkedList* current = flist.head;
     int currentIndex = 0;
 
     while (current) {
-        if (currentIndex == index) return current; // нашли нужный узел
+        if (currentIndex == index) return current;
         current = current->next;
         currentIndex++;
     }
 
-    return nullptr; // индекс выходит за пределы списка
+    return nullptr;
 }
 

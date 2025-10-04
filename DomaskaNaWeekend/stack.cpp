@@ -5,8 +5,8 @@ using namespace std;
 // Конструктор
 Stack::Stack(int size, bool silentMode) {
     capacity = size;
-    arr = new int[capacity];
-    topIndex = -1; // стек пустой
+    arr = new string[capacity];
+    topIndex = -1;
     silent = silentMode;
 }
 
@@ -16,7 +16,7 @@ Stack::~Stack() {
 }
 
 // Добавление элемента в стек
-void Stack::push(int value) {
+void Stack::push(const string& value) {
     if (topIndex >= capacity - 1) {
         if (!silent) {
             cout << "Стек переполнен!" << endl;
@@ -45,12 +45,12 @@ void Stack::pop() {
 }
 
 // Просмотр верхнего элемента
-int Stack::top() {
+string Stack::top() {
     if (topIndex < 0) {
         if (!silent) {
             cout << "Стек пуст!" << endl;
         }
-        return -1; // или можно кинуть исключение
+        return "";
     }
     return arr[topIndex];
 }
@@ -59,4 +59,3 @@ int Stack::top() {
 bool Stack::isEmpty() {
     return topIndex < 0;
 }
-

@@ -38,7 +38,7 @@ string readFromFile(const string& filename) {
 void saveArrayToFile(const Array& arr, const string& filename) {
     string data;
     for (int i = 0; i < arr.size; i++) {
-        data += to_string(arr.data[i]) + " ";
+        data += arr.data[i] + " ";
     }
     saveToFile(filename, data);
 }
@@ -51,7 +51,7 @@ void loadArrayFromFile(Array& arr, const string& filename) {
     init(arr);
 
     stringstream ss(data);
-    int value;
+    string value;
     while (ss >> value) {
         add(arr, value);
     }
@@ -62,7 +62,7 @@ void saveForwardListToFile(const ForwardList& flist, const string& filename) {
     string data;
     linkedList* current = flist.head;
     while (current != nullptr) {
-        data += to_string(current->node) + " ";
+        data += current->node + " ";
         current = current->next;
     }
     saveToFile(filename, data);
@@ -79,7 +79,7 @@ void loadForwardListFromFile(ForwardList& flist, const string& filename) {
     }
 
     stringstream ss(data);
-    int value;
+    string value;
     while (ss >> value) {
         addNode(&flist, nullptr, value, TAIL);
     }
@@ -90,7 +90,7 @@ void saveForwardListTwoToFile(const ForwardListTwo& flist, const string& filenam
     string data;
     DoublyNode* current = flist.head;
     while (current != nullptr) {
-        data += to_string(current->node) + " ";
+        data += current->node + " ";
         current = current->next;
     }
     saveToFile(filename, data);
@@ -108,7 +108,7 @@ void loadForwardListTwoFromFile(ForwardListTwo& flist, const string& filename) {
     flist.tail = nullptr;
 
     stringstream ss(data);
-    int value;
+    string value;
     while (ss >> value) {
         addNodeTwo(&flist, nullptr, value, TAILTwo);
     }
@@ -123,7 +123,7 @@ void saveQueueToFile(Queue<T>& queue, const string& filename) {
 
     while (!queue.isEmpty()) {
         T value = queue.dequeue();
-        data += to_string(value) + " ";
+        data += value + " ";
         tempQueue.enqueue(value);
     }
 
@@ -144,7 +144,7 @@ void loadQueueFromFile(Queue<T>& queue, const string& filename) {
     }
 
     stringstream ss(data);
-    int value;
+    string value;
     while (ss >> value) {
         queue.enqueue(value);
     }
@@ -158,14 +158,14 @@ void saveStackToFile(Stack& stack, const string& filename) {
     Stack restoreStack(100, true);
 
     while (!stack.isEmpty()) {
-        int value = stack.top();
+        string value = stack.top();
         tempStack.push(value);
         stack.pop();
     }
 
     while (!tempStack.isEmpty()) {
-        int value = tempStack.top();
-        data += to_string(value) + " ";
+        string value = tempStack.top();
+        data += value + " ";
         restoreStack.push(value);
         tempStack.pop();
     }
@@ -188,7 +188,7 @@ void loadStackFromFile(Stack& stack, const string& filename) {
 
     Stack tempStack(100, true);
     stringstream ss(data);
-    int value;
+    string value;
 
     while (ss >> value) {
         tempStack.push(value);
@@ -214,7 +214,7 @@ void saveTreeToFile(fullBinaryTree* tree, const string& filename) {
     while (!q.isEmpty()) {
         Node* temp = q.dequeue();
         if (temp) {
-            data += to_string(temp->data) + " ";
+            data += temp->data + " ";
             if (temp->left) q.enqueue(temp->left);
             if (temp->right) q.enqueue(temp->right);
         }
@@ -230,7 +230,7 @@ void loadTreeFromFile(fullBinaryTree* tree, const string& filename) {
     tree->root = nullptr;
 
     stringstream ss(data);
-    int value;
+    string value;
     while (ss >> value) {
         insert(tree, value);
     }

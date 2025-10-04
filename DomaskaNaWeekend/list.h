@@ -1,9 +1,11 @@
 #ifndef list_H
 #define list_H
 
+#include <string>
+
 struct linkedList
 {
-    int node;
+    std::string node;
     linkedList* next;
 };
 
@@ -14,21 +16,12 @@ struct ForwardList
 
 enum Position { HEAD, TAIL, AFTER, BEFORE };
 
-void addNode(ForwardList* flist, linkedList* target, int num, Position pos);
-
-void deleteNode(ForwardList* flist, linkedList* target, int num, Position pos);
-
-bool deleteNodeIndex(ForwardList* flist, int num);
-
-bool findNodeIndex(ForwardList* flist, int num);
-
-
+void addNode(ForwardList* flist, linkedList* target, const std::string& num, Position pos);
+void deleteNode(ForwardList* flist, linkedList* target, const std::string& num, Position pos);
+bool deleteNodeIndex(ForwardList* flist, const std::string& num);
+bool findNodeIndex(ForwardList* flist, const std::string& num);
 void printList(const ForwardList& flist);
-
-// Подсчёт количества узлов в списке
 int countNodes(const ForwardList& flist);
-
-// Получение указателя на узел по индексу
 linkedList* getNodeByIndex(const ForwardList& flist, int index);
 
 #endif

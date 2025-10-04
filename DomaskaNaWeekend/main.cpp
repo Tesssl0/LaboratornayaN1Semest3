@@ -1,22 +1,27 @@
 #include <iostream>
 #include <string>
 #include <filesystem>
+#include <locale>
 #include "command_interface.h"
 
 using namespace std;
 
 int main() {
-    setlocale(LC_ALL, "Ru");
+    // РЈСЃС‚Р°РЅРѕРІРєР° Р»РѕРєР°Р»Рё РґР»СЏ РєРѕСЂСЂРµРєС‚РЅРѕРіРѕ РѕС‚РѕР±СЂР°Р¶РµРЅРёСЏ РєРёСЂРёР»Р»РёС†С‹
+    setlocale(LC_ALL, "ru_RU.UTF-8");
+    ios_base::sync_with_stdio(false);
+    wcin.imbue(locale("ru_RU.UTF-8"));
+    wcout.imbue(locale("ru_RU.UTF-8"));
 
-    // Проверяем текущую директорию
-    cout << "Текущая директория: " << filesystem::current_path() << endl;
+    // РџСЂРѕРІРµСЂСЏРµРј С‚РµРєСѓС‰СѓСЋ РґРёСЂРµРєС‚РѕСЂРёСЋ
+    cout << "РўРµРєСѓС‰Р°СЏ РґРёСЂРµРєС‚РѕСЂРёСЏ: " << filesystem::current_path() << endl;
 
     initGlobalStructures();
 
-    cout << "=== ИНТЕРФЕЙС РАБОТЫ СО СТРУКТУРАМИ ДАННЫХ ===" << endl;
-    cout << "Введите HELP для списка команд" << endl;
+    cout << "=== РРќРўР•Р Р¤Р•Р™РЎ Р РђР‘РћРўР« РЎРћ РЎРўР РЈРљРўРЈР РђРњР Р”РђРќРќР«РҐ ===" << endl;
+    cout << "Р’РІРµРґРёС‚Рµ HELP РґР»СЏ СЃРїРёСЃРєР° РєРѕРјР°РЅРґ" << endl;
 
-    // Только начальная загрузка при старте
+    // РўРѕР»СЊРєРѕ РЅР°С‡Р°Р»СЊРЅР°СЏ Р·Р°РіСЂСѓР·РєР° РїСЂРё СЃС‚Р°СЂС‚Рµ
     LOAD_ALL();
 
     string command;
@@ -31,9 +36,6 @@ int main() {
 
     return 0;
 }
-
-
-
 
 
     

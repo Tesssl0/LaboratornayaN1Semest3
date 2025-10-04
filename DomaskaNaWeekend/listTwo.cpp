@@ -2,7 +2,7 @@
 #include"listTwo.h"
 using namespace std;
 
-void addNodeTwo(ForwardListTwo* flist, DoublyNode* target, int num, PositionTwo pos) {
+void addNodeTwo(ForwardListTwo* flist, DoublyNode* target, const string& num, PositionTwo pos) {
     DoublyNode* newNode = new DoublyNode;
     newNode->node = num;
     newNode->next = nullptr;
@@ -29,7 +29,6 @@ void addNodeTwo(ForwardListTwo* flist, DoublyNode* target, int num, PositionTwo 
         newNode->next = nullptr;       // новый узел — последний, после него нет ничего
         newNode->prev = flist->tail;   // предыдущий — старый хвост
 
-
         if (flist->tail != nullptr) {
             flist->tail->next = newNode; // старый хвост теперь указывает на новый узел
         }
@@ -54,7 +53,6 @@ void addNodeTwo(ForwardListTwo* flist, DoublyNode* target, int num, PositionTwo 
         }
         break;
 
-
     case BEFORETwo: // вставка до узла target
         if (target != nullptr) {
             newNode->next = target;
@@ -71,7 +69,7 @@ void addNodeTwo(ForwardListTwo* flist, DoublyNode* target, int num, PositionTwo 
     }
 }
 
-void deleteNodeTwo(ForwardListTwo* flist, DoublyNode* target, int num, PositionTwo pos) {
+void deleteNodeTwo(ForwardListTwo* flist, DoublyNode* target, const string& num, PositionTwo pos) {
     DoublyNode* toDelete = nullptr;
 
     switch (pos) {
@@ -133,7 +131,7 @@ void deleteNodeTwo(ForwardListTwo* flist, DoublyNode* target, int num, PositionT
     }
 }
 
-bool deleteNodeIndexTwo(ForwardListTwo* flist, int num) {
+bool deleteNodeIndexTwo(ForwardListTwo* flist, const string& num) {
     if (flist->head == nullptr) return false;
 
     DoublyNode* current = flist->head;
@@ -160,7 +158,7 @@ bool deleteNodeIndexTwo(ForwardListTwo* flist, int num) {
     return true;
 }
 
-bool findNodeIndexTwo(ForwardListTwo* flist, int num) {
+bool findNodeIndexTwo(ForwardListTwo* flist, const string& num) {
     DoublyNode* current = flist->head;
     while (current != nullptr) {
         if (current->node == num) return true;
@@ -203,5 +201,3 @@ DoublyNode* getNodeByIndexTwo(ForwardListTwo& flist, int index) {
 
     return nullptr; // индекс за пределами списка
 }
-
-
