@@ -17,6 +17,7 @@ private:
     bool silent;
 
 public:
+    // Конструктор
     Queue(int cap = 10, bool silentMode = false) {
         capacity = cap;
         arr = new T[capacity];
@@ -26,10 +27,47 @@ public:
         silent = silentMode;
     }
 
+    // Конструктор копирования
+    Queue(const Queue& other) {
+        capacity = other.capacity;
+        arr = new T[capacity];
+        frontIndex = other.frontIndex;
+        rearIndex = other.rearIndex;
+        size = other.size;
+        silent = other.silent;
+
+        // Копируем элементы
+        for (int i = 0; i < capacity; i++) {
+            arr[i] = other.arr[i];
+        }
+    }
+
+    // Оператор присваивания
+    Queue& operator=(const Queue& other) {
+        if (this != &other) {
+            delete[] arr;
+
+            capacity = other.capacity;
+            arr = new T[capacity];
+            frontIndex = other.frontIndex;
+            rearIndex = other.rearIndex;
+            size = other.size;
+            silent = other.silent;
+
+            // Копируем элементы
+            for (int i = 0; i < capacity; i++) {
+                arr[i] = other.arr[i];
+            }
+        }
+        return *this;
+    }
+
+    // Деструктор
     ~Queue() {
         delete[] arr;
     }
 
+    // Остальные методы остаются без изменений...
     void enqueue(T value) {
         if (size == capacity) {
             int newCapacity = capacity * 2;

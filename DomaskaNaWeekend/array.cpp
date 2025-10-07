@@ -78,3 +78,13 @@ void print(const Array& arr) {
     }
     cout << endl;
 }
+
+// Поиск элемента по значению
+int findInArray(const Array& arr, const std::string& value) {
+    for (int i = 0; i < arr.size; i++) {
+        if (arr.data[i] == value) {
+            return i;
+        }
+    }
+    return -1;
+}

@@ -4,7 +4,8 @@
 
 #include <string>
 
-struct Stack {
+class Stack {
+public:
     std::string* arr;       // массив для хранения элементов стека
     int capacity;   // максимальный размер стека
     int topIndex;   // индекс вершины стека
@@ -12,6 +13,12 @@ struct Stack {
 
     // Конструктор
     Stack(int size, bool silentMode = false);
+
+    // Конструктор копирования
+    Stack(const Stack& other);
+
+    // Оператор присваивания
+    Stack& operator=(const Stack& other);
 
     // Деструктор
     ~Stack();

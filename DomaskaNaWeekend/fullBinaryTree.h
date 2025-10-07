@@ -32,5 +32,8 @@ void printBFS(fullBinaryTree* tree);
 void deleteNode(fullBinaryTree* tree, const string& value);
 void clearTree(Node* node);
 void clearFullBinaryTree(fullBinaryTree* tree);
-
+// Функции проверки на полное бинарное дерево
+bool isCompleteBinaryTree(Node* root);
+bool isFullBinaryTree(Node* root);
+void checkTreeType(fullBinaryTree* tree);
 #endif

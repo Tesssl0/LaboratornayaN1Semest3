@@ -4,591 +4,162 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <vector>
 #include "file_operations.h"
 
 using namespace std;
 
-// Глобальные структуры данных
-Array globalArray;
-ForwardList globalForwardList;
-ForwardListTwo globalForwardListTwo;
-Queue<string> globalQueue(100, true);  // ТИХИЙ режим по умолчанию
-Stack globalStack(100, true);       // ТИХИЙ режим по умолчанию
-fullBinaryTree globalTree;
+// Максимальное количество именованных структур
+const int MAX_NAMED_STRUCTURES = 100;
 
-// Флаг для отслеживания первой загрузки
-bool firstLoad = true;
+// Структура для именованного стека
+struct NamedStack {
+    string name;
+    Stack stack;
+    bool used;
 
-// Инициализация глобальных структур
-void initGlobalStructures() {
-    init(globalArray);
-    globalForwardList.head = nullptr;
-    globalForwardListTwo.head = nullptr;
-    globalForwardListTwo.tail = nullptr;
-    globalTree.root = nullptr;
-    firstLoad = true;
-}
+    NamedStack() : stack(100, true), used(false) {}
+};
 
-// Функции для работы с массивом
-void MPUSH(const string& value) {
-    add(globalArray, value);
-    cout << "Добавлен элемент " << value << " в массив" << endl;
-}
+// Структура для именованной очереди
+struct NamedQueue {
+    string name;
+    Queue<string>* queue;  // Используем указатель
+    bool used;
 
-void MDEL(int index) {
-    if (index >= 0 && index < globalArray.size) {
-        string value = get(globalArray, index);
-        remove(globalArray, index);
-        cout << "Удален элемент " << value << " из массива по индексу " << index << endl;
-    }
-    else {
-        cout << "Неверный индекс" << endl;
-    }
-}
+    NamedQueue() : queue(nullptr), used(false) {}
 
-string MGET(int index) {
-    if (index >= 0 && index < globalArray.size) {
-        string value = get(globalArray, index);
-        cout << "Элемент по индексу " << index << ": " << value << endl;
-        return value;
+    ~NamedQueue() {
+        delete queue;
     }
-    else {
-        cout << "Неверный индекс" << endl;
-        return "";
-    }
-}
+};
 
-// Функции для работы с односвязным списком
-void FPUSH(const string& value, int position = -1) {
-    if (position == -1) {
-        // Добавление в конец
-        addNode(&globalForwardList, nullptr, value, TAIL);
-    }
-    else {
-        // Добавление по индексу
-        linkedList* target = getNodeByIndex(globalForwardList, position);
-        if (target) {
-            addNode(&globalForwardList, target, value, AFTER);
-        }
-        else {
-            cout << "Неверная позиция" << endl;
-            return;
-        }
-    }
-    cout << "Добавлен элемент " << value << " в односвязный список" << endl;
-}
+// Структура для именованного массива
+struct NamedArray {
+    string name;
+    Array array;
+    bool used;
 
-void FDEL(const string& value) {
-    if (deleteNodeIndex(&globalForwardList, value)) {
-        cout << "Удален элемент " << value << " из односвязного списка" << endl;
-    }
-    else {
-        cout << "Элемент не найден" << endl;
-    }
-}
+    NamedArray() : used(false) {}
+};
 
-string FGET(int index) {
-    linkedList* node = getNodeByIndex(globalForwardList, index);
-    if (node) {
-        cout << "Элемент по индексу " << index << ": " << node->node << endl;
-        return node->node;
-    }
-    else {
-        cout << "Неверный индекс" << endl;
-        return "";
-    }
-}
+// Структура для именованного односвязного списка
+struct NamedList {
+    string name;
+    ForwardList list;
+    bool used;
 
-// Функции для работы с двусвязным списком
-void LPUSH(const string& value, int position = -1) {
-    if (position == -1) {
-        // Добавление в конец
-        addNodeTwo(&globalForwardListTwo, nullptr, value, TAILTwo);
+    NamedList() : used(false) {
+        list.head = nullptr;
     }
-    else {
-        // Добавление по индексу
-        DoublyNode* target = getNodeByIndexTwo(globalForwardListTwo, position);
-        if (target) {
-            addNodeTwo(&globalForwardListTwo, target, value, AFTERTwo);
-        }
-        else {
-            cout << "Неверная позиция" << endl;
-            return;
-        }
-    }
-    cout << "Добавлен элемент " << value << " в двусвязный список" << endl;
-}
+};
 
-void LDEL(const string& value) {
-    if (deleteNodeIndexTwo(&globalForwardListTwo, value)) {
-        cout << "Удален элемент " << value << " из двусвязного списка" << endl;
-    }
-    else {
-        cout << "Элемент не найден" << endl;
-    }
-}
+// Структура для именованного двусвязного списка
+struct NamedListTwo {
+    string name;
+    ForwardListTwo list;
+    bool used;
 
-string LGET(int index) {
-    DoublyNode* node = getNodeByIndexTwo(globalForwardListTwo, index);
-    if (node) {
-        cout << "Элемент по индексу " << index << ": " << node->node << endl;
-        return node->node;
+    NamedListTwo() : used(false) {
+        list.head = nullptr;
+        list.tail = nullptr;
     }
-    else {
-        cout << "Неверный индекс" << endl;
-        return "";
+};
+
+// Структура для именованного дерева
+struct NamedTree {
+    string name;
+    fullBinaryTree tree;
+    bool used;
+
+    NamedTree() : used(false) {
+        tree.root = nullptr;
     }
-}
+};
 
-// Функции для работы с очередью
-void QPUSH(const string& value) {
-    globalQueue.enqueue(value);
-    cout << "Добавлен элемент " << value << " в очередь" << endl;
-}
 
-string QPOP() {
-    string value = globalQueue.dequeue();
-    if (value != string()) {
-        cout << "Извлечен элемент " << value << " из очереди" << endl;
-    }
-    return value;
-}
 
-string QGET() {
-    string value = globalQueue.front();
-    if (value != string()) {
-        cout << "Первый элемент очереди: " << value << endl;
-    }
-    return value;
-}
+// Объявления именованных структур
+extern NamedStack namedStacks[MAX_NAMED_STRUCTURES];
+extern NamedQueue namedQueues[MAX_NAMED_STRUCTURES];
+extern NamedArray namedArrays[MAX_NAMED_STRUCTURES];
+extern NamedList namedLists[MAX_NAMED_STRUCTURES];
+extern NamedListTwo namedListsTwo[MAX_NAMED_STRUCTURES];
+extern NamedTree namedTrees[MAX_NAMED_STRUCTURES];
 
-// Функции для работы со стеком
-void SPUSH(const string& value) {
-    globalStack.push(value);
-    cout << "Добавлен элемент " << value << " в стек" << endl;
-}
+extern int namedStacksCount;
+extern int namedQueuesCount;
+extern int namedArraysCount;
+extern int namedListsCount;
+extern int namedListsTwoCount;
+extern int namedTreesCount;
 
-void SPOP() {
-    if (!globalStack.isEmpty()) {
-        string value = globalStack.top();
-        globalStack.pop();
-        cout << "Извлечен элемент " << value << " из стека" << endl;
-    }
-}
+extern bool firstLoad;
 
-string SGET() {
-    if (!globalStack.isEmpty()) {
-        string value = globalStack.top();
-        cout << "Верхний элемент стека: " << value << endl;
-        return value;
-    }
-    return "";
-}
+void initGlobalStructures();
+
+void LOAD_ALL_FROM(const std::string& filename);
+void SAVE_ALL_TO(const std::string& filename);
+
+// Функции для работы с именованными стеками
+void NAMED_SPUSH(const string& stackName, const string& value);
+void NAMED_SPOP(const string& stackName);
+void NAMED_SGET(const string& stackName);
+void NAMED_PRINT_STACK(const string& stackName);
+
+// Функции для работы с именованными очередями
+void NAMED_QPUSH(const string& queueName, const string& value);
+void NAMED_QPOP(const string& queueName);
+void NAMED_QGET(const string& queueName);
+void NAMED_PRINT_QUEUE(const string& queueName);
+
+// Функции для работы с именованными массивами
+void NAMED_MPUSH(const string& arrayName, const string& value);
+void NAMED_MDEL(const string& arrayName, int index);
+void NAMED_MGET(const string& arrayName, int index);
+void NAMED_PRINT_ARRAY(const string& arrayName);
+
+// Функции для работы с именованными односвязными списками
+void NAMED_FPUSH(const string& listName, const string& value, int position = -1);
+void NAMED_FDEL(const string& listName, const string& value);
+void NAMED_FGET(const string& listName, int index);
+void NAMED_PRINT_LIST(const string& listName);
+
+// Функции для работы с именованными двусвязными списками
+void NAMED_LPUSH(const string& listName, const string& value, int position = -1);
+void NAMED_LDEL(const string& listName, const string& value);
+void NAMED_LGET(const string& listName, int index);
+void NAMED_PRINT_LIST_TWO(const string& listName);
+
+// Функции для работы с именованными деревьями
+void NAMED_TINSERT(const string& treeName, const string& value);
+void NAMED_TDEL(const string& treeName, const string& value);
+void NAMED_TGET(const string& treeName, const string& value);
+void NAMED_PRINT_TREE(const string& treeName);
 
 // Функции для работы с деревом
-void TINSERT(const string& value) {
-    insert(&globalTree, value);
-    cout << "Добавлен элемент " << value << " в дерево" << endl;
-}
-
-void TDEL(const string& value) {
-    try {
-        if (value.empty()) {
-            cout << "Ошибка: пустая строка для удаления" << endl;
-            return;
-        }
-        deleteNode(&globalTree, value);
-    }
-    catch (const exception& e) {
-        cout << "Ошибка при удалении из дерева: " << e.what() << endl;
-    }
-    catch (...) {
-        cout << "Неизвестная ошибка при удалении из дерева" << endl;
-    }
-}
-
-string TGET(const string& value) {
-    Node* node = BFS(&globalTree, value);
-    if (node) {
-        cout << "Найден элемент " << value << " в дереве" << endl;
-        return node->data;
-    }
-    else {
-        cout << "Элемент " << value << " не найден в дереве" << endl;
-        return "";
-    }
-}
 
 // Универсальная функция PRINT
-void PRINT(const string& structure) {
-    if (structure == "M") {
-        cout << "Массив: ";
-        print(globalArray);
-    }
-    else if (structure == "F") {
-        cout << "Односвязный список: ";
-        printList(globalForwardList);
-    }
-    else if (structure == "L") {
-        cout << "Двусвязный список: ";
-        printListTwo(globalForwardListTwo);
-    }
-    else if (structure == "Q") {
-        cout << "Очередь: ";
-        if (globalQueue.isEmpty()) {
-            cout << "пуста" << endl;
-        }
-        else {
-            // Простой вывод без копирования
-            cout << "[первый: " << globalQueue.front() << ", размер: ";
+void PRINT(const string& structure);
+void SAVE_ALL();
+void LOAD_ALL();
+void CLEAR_ALL();
+void processCommand(const string& command);
 
-            // Подсчет размера очереди
-            Queue<string> tempQueue(100, true);
-            int size = 0;
-            while (!globalQueue.isEmpty()) {
-                string value = globalQueue.dequeue();
-                tempQueue.enqueue(value);
-                size++;
-            }
+// Вспомогательные функции для работы с именованными структурами
+NamedStack* findStackByName(const string& name);
+NamedQueue* findQueueByName(const string& name);
+NamedArray* findArrayByName(const string& name);
+NamedList* findListByName(const string& name);
+NamedListTwo* findListTwoByName(const string& name);
+NamedTree* findTreeByName(const string& name);
 
-            // Восстанавливаем очередь
-            while (!tempQueue.isEmpty()) {
-                globalQueue.enqueue(tempQueue.dequeue());
-            }
+NamedStack* createNewStack(const string& name);
+NamedQueue* createNewQueue(const string& name);
+NamedArray* createNewArray(const string& name);
+NamedList* createNewList(const string& name);
+NamedListTwo* createNewListTwo(const string& name);
+NamedTree* createNewTree(const string& name);
 
-            cout << size << " элементов]" << endl;
-        }
-    }
-    else if (structure == "S") {
-        cout << "Стек: ";
-        if (globalStack.isEmpty()) {
-            cout << "пуст" << endl;
-        }
-        else {
-            // Простой вывод без копирования - только верхний элемент и размер
-            cout << "[верхний: " << globalStack.top() << ", размер: ";
-
-            // Подсчет размера стека
-            Stack tempStack(100, true);
-            int size = 0;
-            while (!globalStack.isEmpty()) {
-                string value = globalStack.top();
-                tempStack.push(value);
-                globalStack.pop();
-                size++;
-            }
-
-            // Восстанавливаем стек
-            while (!tempStack.isEmpty()) {
-                globalStack.push(tempStack.top());
-                tempStack.pop();
-            }
-
-            cout << size << " элементов]" << endl;
-        }
-    }
-    else if (structure == "T") {
-        // Вывод дерева разными способами
-        cout << "=== ДЕРЕВО ===" << endl;
-        cout << "Inorder (симметричный): ";
-        inorder(globalTree.root);
-        cout << endl;
-
-        cout << "Preorder (прямой): ";
-        preorder(globalTree.root);
-        cout << endl;
-
-        cout << "Postorder (обратный): ";
-        postorder(globalTree.root);
-        cout << endl;
-
-        printBFS(&globalTree);
-    }
-    else if (structure == "T_INORDER") {
-        cout << "Дерево (Inorder): ";
-        inorder(globalTree.root);
-        cout << endl;
-    }
-    else if (structure == "T_PREORDER") {
-        cout << "Дерево (Preorder): ";
-        preorder(globalTree.root);
-        cout << endl;
-    }
-    else if (structure == "T_POSTORDER") {
-        cout << "Дерево (Postorder): ";
-        postorder(globalTree.root);
-        cout << endl;
-    }
-    else if (structure == "T_BFS") {
-        printBFS(&globalTree);
-    }
-    else {
-        cout << "Неизвестная структура: " << structure << endl;
-    }
-}
-
-// Функция сохранения всех данных
-void SAVE_ALL() {
-    saveArrayToFile(globalArray, "array_data.txt");
-    saveForwardListToFile(globalForwardList, "forward_list_data.txt");
-    saveForwardListTwoToFile(globalForwardListTwo, "forward_list_two_data.txt");
-    saveQueueToFile(globalQueue, "queue_data.txt");
-    saveStackToFile(globalStack, "stack_data.txt");
-    saveTreeToFile(&globalTree, "tree_data.txt");
-    cout << "Все данные сохранены в файлы" << endl;
-}
-
-// Функция загрузки всех данных
-// Функция загрузки всех данных
-void LOAD_ALL() {
-    // При первой загрузке просто загружаем данные
-    if (firstLoad) {
-        loadArrayFromFile(globalArray, "array_data.txt");
-        loadForwardListFromFile(globalForwardList, "forward_list_data.txt");
-        loadForwardListTwoFromFile(globalForwardListTwo, "forward_list_two_data.txt");
-        loadQueueFromFile(globalQueue, "queue_data.txt");
-        loadStackFromFile(globalStack, "stack_data.txt");
-        loadTreeFromFile(&globalTree, "tree_data.txt");
-        firstLoad = false;
-        cout << "Все данные загружены из файлов" << endl;
-    }
-    else {
-        // При повторной загрузке спрашиваем подтверждение
-        cout << "Текущие данные будут потеряны. Продолжить? (y/n): ";
-        string answer;
-        getline(cin, answer);
-        if (answer == "y" || answer == "Y") {
-            // Очищаем текущие данные
-            destroy(globalArray);
-            init(globalArray);
-
-            while (globalForwardList.head != nullptr) {
-                linkedList* temp = globalForwardList.head;
-                globalForwardList.head = globalForwardList.head->next;
-                delete temp;
-            }
-
-            while (globalForwardListTwo.head != nullptr) {
-                DoublyNode* temp = globalForwardListTwo.head;
-                globalForwardListTwo.head = globalForwardListTwo.head->next;
-                delete temp;
-            }
-            globalForwardListTwo.tail = nullptr;
-
-            while (!globalQueue.isEmpty()) {
-                globalQueue.dequeue();
-            }
-
-            while (!globalStack.isEmpty()) {
-                globalStack.pop();
-            }
-
-            // Исправление для дерева - правильная очистка
-            if (globalTree.root != nullptr) {
-                // Нужно добавить функцию полной очистки дерева
-                globalTree.root = nullptr;
-            }
-
-            // Загружаем новые данные
-            loadArrayFromFile(globalArray, "array_data.txt");
-            loadForwardListFromFile(globalForwardList, "forward_list_data.txt");
-            loadForwardListTwoFromFile(globalForwardListTwo, "forward_list_two_data.txt");
-            loadQueueFromFile(globalQueue, "queue_data.txt");
-            loadStackFromFile(globalStack, "stack_data.txt");
-            loadTreeFromFile(&globalTree, "tree_data.txt");
-            cout << "Все данные загружены из файлов" << endl;
-        }
-        else {
-            cout << "Загрузка отменена" << endl;
-        }
-    }
-}
-
-// Функция очистки всех данных
-// Функция очистки всех данных
-void CLEAR_ALL() {
-    // Очищаем структуры в памяти
-    destroy(globalArray);
-    init(globalArray);
-
-    while (globalForwardList.head != nullptr) {
-        linkedList* temp = globalForwardList.head;
-        globalForwardList.head = globalForwardList.head->next;
-        delete temp;
-    }
-
-    while (globalForwardListTwo.head != nullptr) {
-        DoublyNode* temp = globalForwardListTwo.head;
-        globalForwardListTwo.head = globalForwardListTwo.head->next;
-        delete temp;
-    }
-    globalForwardListTwo.tail = nullptr;
-
-    while (!globalQueue.isEmpty()) {
-        globalQueue.dequeue();
-    }
-
-    while (!globalStack.isEmpty()) {
-        globalStack.pop();
-    }
-
-    // Правильная очистка дерева
-    if (globalTree.root != nullptr) {
-        clearFullBinaryTree(&globalTree);
-    }
-
-    cout << "Все данные очищены из памяти" << endl;
-}
-
-// Интерфейс командной строки
-void processCommand(const string& command) {
-    istringstream iss(command);
-    string cmd;
-    iss >> cmd;
-
-    // Проверка команд через if-else цепочку вместо map
-    if (cmd == "MPUSH") {
-        string value;
-        if (iss >> value) MPUSH(value);
-        else cout << "Неверный формат команды: MPUSH <value>" << endl;
-    }
-    else if (cmd == "MDEL") {
-        int index;
-        if (iss >> index) MDEL(index);
-        else cout << "Неверный формат команды: MDEL <index>" << endl;
-    }
-    else if (cmd == "MGET") {
-        int index;
-        if (iss >> index) MGET(index);
-        else cout << "Неверный формат команды: MGET <index>" << endl;
-    }
-    else if (cmd == "FPUSH") {
-        string value;
-        int position = -1;
-        if (iss >> value) {
-            if (iss >> position) FPUSH(value, position);
-            else FPUSH(value);
-        }
-        else cout << "Неверный формат команды: FPUSH <value> [position]" << endl;
-    }
-    else if (cmd == "FDEL") {
-        string value;
-        if (iss >> value) FDEL(value);
-        else cout << "Неверный формат команды: FDEL <value>" << endl;
-    }
-    else if (cmd == "FGET") {
-        int index;
-        if (iss >> index) FGET(index);
-        else cout << "Неверный формат команды: FGET <index>" << endl;
-    }
-    else if (cmd == "LPUSH") {
-        string value;
-        int position = -1;
-        if (iss >> value) {
-            if (iss >> position) LPUSH(value, position);
-            else LPUSH(value);
-        }
-        else cout << "Неверный формат команды: LPUSH <value> [position]" << endl;
-    }
-    else if (cmd == "LDEL") {
-        string value;
-        if (iss >> value) LDEL(value);
-        else cout << "Неверный формат команды: LDEL <value>" << endl;
-    }
-    else if (cmd == "LGET") {
-        int index;
-        if (iss >> index) LGET(index);
-        else cout << "Неверный формат команды: LGET <index>" << endl;
-    }
-    else if (cmd == "QPUSH") {
-        string value;
-        if (iss >> value) QPUSH(value);
-        else cout << "Неверный формат команды: QPUSH <value>" << endl;
-    }
-    else if (cmd == "QPOP") {
-        QPOP();
-    }
-    else if (cmd == "QGET") {
-        QGET();
-    }
-    else if (cmd == "SPUSH") {
-        string value;
-        if (iss >> value) SPUSH(value);
-        else cout << "Неверный формат команды: SPUSH <value>" << endl;
-    }
-    else if (cmd == "SPOP") {
-        SPOP();
-    }
-    else if (cmd == "SGET") {
-        SGET();
-    }
-    else if (cmd == "TINSERT") {
-        string value;
-        if (iss >> value) TINSERT(value);
-        else cout << "Неверный формат команды: TINSERT <value>" << endl;
-    }
-    else if (cmd == "TDEL") {
-        string value;
-        if (iss >> value) TDEL(value);
-        else cout << "Неверный формат команды: TDEL <value>" << endl;
-    }
-    else if (cmd == "TGET") {
-        string value;
-        if (iss >> value) TGET(value);
-        else cout << "Неверный формат команды: TGET <value>" << endl;
-    }
-    else if (cmd == "PRINT") {
-        string structure;
-        if (iss >> structure) PRINT(structure);
-        else cout << "Неверный формат команды: PRINT <structure>" << endl;
-    }
-    else if (cmd == "SAVE_ALL") {
-        SAVE_ALL();
-    }
-    else if (cmd == "LOAD_ALL") {
-        LOAD_ALL();
-    }
-    else if (cmd == "CLEAR_ALL") {
-        CLEAR_ALL();
-    }
-    else if (cmd == "EXIT" || cmd == "QUIT") {
-        // Автоматическое сохранение при выходе
-        SAVE_ALL();
-        exit(0);
-    }
-    else if (cmd == "HELP") {
-        cout << "Доступные команды:" << endl;
-        cout << "MPUSH <value> - добавить в массив" << endl;
-        cout << "MDEL <index> - удалить из массива по индексу" << endl;
-        cout << "MGET <index> - получить элемент массива по индексу" << endl;
-        cout << "FPUSH <value> [position] - добавить в односвязный список" << endl;
-        cout << "FDEL <value> - удалить из односвязного списка по значению" << endl;
-        cout << "FGET <index> - получить элемент односвязного списка по индексу" << endl;
-        cout << "LPUSH <value> [position] - добавить в двусвязный список" << endl;
-        cout << "LDEL <value> - удалить из двусвязного списка по значению" << endl;
-        cout << "LGET <index> - получить элемент двусвязного списка по индексу" << endl;
-        cout << "QPUSH <value> - добавить в очередь" << endl;
-        cout << "QPOP - извлечь из очереди" << endl;
-        cout << "QGET - посмотреть первый элемент очереди" << endl;
-        cout << "SPUSH <value> - добавить в стек" << endl;
-        cout << "SPOP - извлечь из стека" << endl;
-        cout << "SGET - посмотреть верхний элемент стека" << endl;
-        cout << "TINSERT <value> - добавить в дерево" << endl;
-        cout << "TDEL <value> - удалить из дерева" << endl;
-        cout << "TGET <value> - найти в дереве" << endl;
-        cout << "PRINT <structure> - вывести структуру (M,F,L,Q,S,T)" << endl;
-        cout << "PRINT T_INORDER - вывести дерево Inorder" << endl;
-        cout << "PRINT T_PREORDER - вывести дерево Preorder" << endl;
-        cout << "PRINT T_POSTORDER - вывести дерево Postorder" << endl;
-        cout << "PRINT T_BFS - вывести дерево BFS" << endl;
-        cout << "SAVE_ALL - сохранить все данные в файлы" << endl;
-        cout << "LOAD_ALL - загрузить все данные из файлов" << endl;
-        cout << "CLEAR_ALL - очистить все данные" << endl;
-        cout << "EXIT/QUIT - выход (с автосохранением)" << endl;
-    }
-    else {
-        cout << "Неизвестная команда. Введите HELP для списка команд." << endl;
-    }
-}
 
 #endif

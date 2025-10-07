@@ -8,11 +8,19 @@ Stack::Stack(int size, bool silentMode) {
     arr = new string[capacity];
     topIndex = -1;
     silent = silentMode;
+
+    // Инициализируем все элементы пустыми строками
+    for (int i = 0; i < capacity; i++) {
+        arr[i] = "";
+    }
 }
 
 // Деструктор
 Stack::~Stack() {
-    delete[] arr;
+    if (arr != nullptr) {
+        delete[] arr;
+        arr = nullptr;
+    }
 }
 
 // Добавление элемента в стек
@@ -58,4 +66,30 @@ string Stack::top() {
 // Проверка, пуст ли стек
 bool Stack::isEmpty() {
     return topIndex < 0;
+}
+
+// Конструктор копирования
+Stack::Stack(const Stack& other) {
+    capacity = other.capacity;
+    topIndex = other.topIndex;
+    silent = other.silent;
+    arr = new string[capacity];
+    for (int i = 0; i <= topIndex; i++) {
+        arr[i] = other.arr[i];
+    }
+}
+
+// Оператор присваивания
+Stack& Stack::operator=(const Stack& other) {
+    if (this != &other) {
+        delete[] arr;
+        capacity = other.capacity;
+        topIndex = other.topIndex;
+        silent = other.silent;
+        arr = new string[capacity];
+        for (int i = 0; i <= topIndex; i++) {
+            arr[i] = other.arr[i];
+        }
+    }
+    return *this;
 }
