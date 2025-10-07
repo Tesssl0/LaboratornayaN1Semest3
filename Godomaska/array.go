@@ -3,108 +3,97 @@ package main
 import "fmt"
 
 type Array struct {
-    data     []int
-    size     int
-    capacity int
+	Data     []string
+	Size     int
+	Capacity int
 }
 
 func NewArray(initialCapacity int) *Array {
-    if initialCapacity <= 0 {
-        initialCapacity = 10
-    }
-    return &Array{
-        data:     make([]int, initialCapacity),
-        size:     0,
-        capacity: initialCapacity,
-    }
+	if initialCapacity <= 0 {
+		initialCapacity = 10
+	}
+	return &Array{
+		Data:     make([]string, initialCapacity),
+		Size:     0,
+		Capacity: initialCapacity,
+	}
 }
 
-func (arr *Array) Add(value int) {
-    if arr.size == arr.capacity {
-        arr.resize()
-    }
-    arr.data[arr.size] = value
-    arr.size++
+func (a *Array) resize() {
+	newCap := a.Capacity * 2
+	if newCap == 0 {
+		newCap = 1
+	}
+	newData := make([]string, newCap)
+	copy(newData, a.Data[:a.Size])
+	a.Data = newData
+	a.Capacity = newCap
 }
 
-func (arr *Array) resize() {
-    arr.capacity *= 2
-    newData := make([]int, arr.capacity)
-    copy(newData, arr.data[:arr.size])
-    arr.data = newData
+func (a *Array) Add(value string) {
+	if a.Size == a.Capacity {
+		a.resize()
+	}
+	a.Data[a.Size] = value
+	a.Size++
 }
 
-func (arr *Array) Print() {
-    for i := 0; i < arr.size; i++ {
-        fmt.Printf("%d ", arr.data[i])
-    }
-    fmt.Println()
+func (a *Array) AddAt(index int, value string) bool {
+	if index < 0 || index > a.Size {
+		return false
+	}
+	if a.Size == a.Capacity {
+		a.resize()
+	}
+	// shift elements to the right
+	a.Data = append(a.Data[:index+1], a.Data[index:a.Size]...)
+	a.Data[index] = value
+	a.Size++
+	return true
 }
 
-func (arr *Array) Length() int {
-    return arr.size
+func (a *Array) Get(index int) (string, bool) {
+	if index < 0 || index >= a.Size {
+		return "", false
+	}
+	return a.Data[index], true
 }
 
-func (arr *Array) Capacity() int {
-    return arr.capacity
-}
-func (arr *Array) AddAt(index int, value int) error {
-    if index < 0 || index > arr.size {
-        return fmt.Errorf("индекс %d вне границ", index)
-    }
-    
-    if arr.size == arr.capacity {
-        arr.resize()
-    }
-    
-    // Сдвигаем элементы вправо
-    for i := arr.size; i > index; i-- {
-        arr.data[i] = arr.data[i-1]
-    }
-    
-    arr.data[index] = value
-    arr.size++
-    return nil
+func (a *Array) Remove(index int) bool {
+	if index < 0 || index >= a.Size {
+		return false
+	}
+	copy(a.Data[index:], a.Data[index+1:a.Size])
+	a.Size--
+	a.Data[a.Size] = ""
+	return true
 }
 
-// Remove удаляет элемент по индексу
-func (arr *Array) Remove(index int) error {
-    if index < 0 || index >= arr.size {
-        return fmt.Errorf("индекс %d вне границ", index)
-    }
-    
-    // Сдвигаем элементы влево
-    for i := index; i < arr.size-1; i++ {
-        arr.data[i] = arr.data[i+1]
-    }
-    
-    arr.size--
-    return nil
+func (a *Array) Set(index int, value string) bool {
+	if index < 0 || index >= a.Size {
+		return false
+	}
+	a.Data[index] = value
+	return true
 }
 
-// Get возвращает элемент по индексу
-func (arr *Array) Get(index int) (int, error) {
-    if index < 0 || index >= arr.size {
-        return 0, fmt.Errorf("индекс %d вне границ", index)
-    }
-    return arr.data[index], nil
+func (a *Array) Length() int {
+	return a.Size
 }
 
-// Set устанавливает значение элемента по индексу
-func (arr *Array) Set(index int, value int) error {
-    if index < 0 || index >= arr.size {
-        return fmt.Errorf("индекс %d вне границ", index)
-    }
-    arr.data[index] = value
-    return nil
+func (a *Array) Print() {
+	fmt.Print("(массив): ")
+	for i := 0; i < a.Size; i++ {
+		fmt.Print(a.Data[i], " ")
+	}
+	fmt.Println()
 }
 
-// Contains проверяет наличие элемента
-func (arr *Array) Contains(value int) bool {
-    for i := 0; i < arr.size; i++ {
-        if arr.data[i] == value {
-            return true
-        }
-    }
-    return false
+func (a *Array) Find(value string) int {
+	for i := 0; i < a.Size; i++ {
+		if a.Data[i] == value {
+			return i
+		}
+	}
+	return -1
 }
