@@ -1,1 +1,0 @@
-new_layer middle_layer bottom_layer bottom_layer middle_layer new_layer bottom_layer middle_layer new_layer bottom_layer middle_layer new_layer 
