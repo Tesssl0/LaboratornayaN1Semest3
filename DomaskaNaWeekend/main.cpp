@@ -2,7 +2,7 @@
 #include <string>
 #include <locale>
 #include <windows.h>
-#include <vector>
+
 #include <sstream>
 #include "command_interface.h"
 
@@ -36,13 +36,16 @@ bool isReadOnlyCommand(const string& command) {
     string cmd;
     iss >> cmd;
 
-    vector<string> readOnlyCommands = {
+    // Список команд только для чтения
+    const char* readOnlyCommands[] = {
         "SGET", "QGET", "MGET", "FGET", "LGET", "TGET",
         "PRINT", "HELP", "CHECK_TREE"
     };
 
-    for (const auto& readOnlyCmd : readOnlyCommands) {
-        if (cmd == readOnlyCmd) {
+    const int numCommands = sizeof(readOnlyCommands) / sizeof(readOnlyCommands[0]);
+
+    for (int i = 0; i < numCommands; i++) {
+        if (cmd == readOnlyCommands[i]) {
             return true;
         }
     }
