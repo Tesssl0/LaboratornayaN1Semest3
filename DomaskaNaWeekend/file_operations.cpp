@@ -374,14 +374,17 @@ void loadNamedArraysFromFile(const string& filename) {
         istringstream iss(line);
         string type, name;
         if (iss >> type >> name && type == "ARRAY") {
-            NamedArray* array = findArrayByName(name);
-            if (!array) {
-                array = createNewArray(name);
+            NamedArray* arr = findArrayByName(name);
+            if (!arr) {
+                arr = createNewArray(name);
             }
-            if (array) {
+            if (arr) {
+                destroy(arr->array);
+                init(arr->array);
+
                 string value;
                 while (iss >> value) {
-                    add(array->array, value);
+                    add(arr->array, value);
                 }
             }
         }
