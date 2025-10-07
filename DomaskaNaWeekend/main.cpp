@@ -111,7 +111,7 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    // Интерактивный режим - также добавим возможность загрузки
+    // Интерактивный режим 
     string command;
     string currentFilename = "";
 

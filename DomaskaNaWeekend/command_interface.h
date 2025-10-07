@@ -117,19 +117,31 @@ void NAMED_PRINT_QUEUE(const string& queueName);
 void NAMED_MPUSH(const string& arrayName, const string& value);
 void NAMED_MDEL(const string& arrayName, int index);
 void NAMED_MGET(const string& arrayName, int index);
+void NAMED_MADDAT(const string& arrayName, int index, const string& value);
+void NAMED_MSET(const string& arrayName, int index, const string& value);
+void NAMED_MLENGTH(const string& arrayName);
+void NAMED_MFIND(const string& arrayName, const string& value);
+void NAMED_MCREATE(const string& arrayName);
 void NAMED_PRINT_ARRAY(const string& arrayName);
 
 // Функции для работы с именованными односвязными списками
 void NAMED_FPUSH(const string& listName, const string& value, int position = -1);
 void NAMED_FDEL(const string& listName, const string& value);
 void NAMED_FGET(const string& listName, int index);
+void NAMED_FFIND(const string& listName, const string& value);
+void NAMED_FCOUNT(const string& listName);
 void NAMED_PRINT_LIST(const string& listName);
+
 
 // Функции для работы с именованными двусвязными списками
 void NAMED_LPUSH(const string& listName, const string& value, int position = -1);
 void NAMED_LDEL(const string& listName, const string& value);
 void NAMED_LGET(const string& listName, int index);
+void NAMED_LFIND(const string& listName, const string& value);
+void NAMED_LCOUNT(const string& listName);
+void NAMED_PRINT_LIST_TWO_REVERSE(const string& listName);
 void NAMED_PRINT_LIST_TWO(const string& listName);
+
 
 // Функции для работы с именованными деревьями
 void NAMED_TINSERT(const string& treeName, const string& value);
@@ -137,7 +149,6 @@ void NAMED_TDEL(const string& treeName, const string& value);
 void NAMED_TGET(const string& treeName, const string& value);
 void NAMED_PRINT_TREE(const string& treeName);
 
-// Функции для работы с деревом
 
 // Универсальная функция PRINT
 void PRINT(const string& structure);
@@ -153,7 +164,6 @@ NamedArray* findArrayByName(const string& name);
 NamedList* findListByName(const string& name);
 NamedListTwo* findListTwoByName(const string& name);
 NamedTree* findTreeByName(const string& name);
-
 NamedStack* createNewStack(const string& name);
 NamedQueue* createNewQueue(const string& name);
 NamedArray* createNewArray(const string& name);
