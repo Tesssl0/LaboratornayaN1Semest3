@@ -2,61 +2,103 @@
 #include"listTwo.h"
 using namespace std;
 
-void addNodeTwo(ForwardListTwo* flist, DoublyNode* target, const string& num, PositionTwo pos) {
+void addNodeHeadTwo(ForwardListTwo* flist, const string& num) {
+    DoublyNode* newNode = new DoublyNode;
+    newNode->node = num;
+    newNode->next = flist->head;
+    newNode->prev = nullptr;
+
+    if (flist->head != nullptr) {
+        flist->head->prev = newNode;
+    }
+    flist->head = newNode;
+
+    if (flist->tail == nullptr) {
+        flist->tail = newNode;
+    }
+}
+
+void addNodeTailTwo(ForwardListTwo* flist, const string& num) {
     DoublyNode* newNode = new DoublyNode;
     newNode->node = num;
     newNode->next = nullptr;
-    newNode->prev = nullptr;
+    newNode->prev = flist->tail;
 
-    switch (pos) {
-    case HEADTwo: // вставка в начало
-        newNode->next = flist->head;
+    if (flist->tail != nullptr) {
+        flist->tail->next = newNode;
+    }
+
+    flist->tail = newNode;
+
+    if (flist->head == nullptr) {
+        flist->head = newNode;
+    }
+}
+
+void addNodeAfterTwo(ForwardListTwo* flist, DoublyNode* target, const string& num) {
+    if (target != nullptr && flist->head != nullptr) {
+        DoublyNode* newNode = new DoublyNode;
+        newNode->node = num;
+        newNode->next = nullptr;
         newNode->prev = nullptr;
 
-        if (flist->head != nullptr)
-        {
-            flist->head->prev = newNode;
-        }
-        flist->head = newNode;
+        // Проверяем, что target действительно находится в списке
+        DoublyNode* current = flist->head;
+        bool targetFound = false;
 
-        if (flist->tail == nullptr)
-        {
-            flist->tail = newNode;
-        }
-        break;
-
-    case TAILTwo: // вставка в хвост
-        newNode->next = nullptr;       // новый узел — последний, после него нет ничего
-        newNode->prev = flist->tail;   // предыдущий — старый хвост
-
-        if (flist->tail != nullptr) {
-            flist->tail->next = newNode; // старый хвост теперь указывает на новый узел
+        while (current != nullptr) {
+            if (current == target) {
+                targetFound = true;
+                break;
+            }
+            current = current->next;
         }
 
-        flist->tail = newNode;          // обновляем хвост списка
-
-        if (flist->head == nullptr) {
-            flist->head = newNode;      // если список был пуст, голова тоже новый узел
-        }
-
-        break;
-
-    case AFTERTwo:
-        if (target != nullptr) {
+        if (targetFound) {
+            // Вставляем после target
             newNode->next = target->next;
             newNode->prev = target;
-            if (target->next != nullptr)
+
+            if (target->next != nullptr) {
                 target->next->prev = newNode;
-            else
-                flist->tail = newNode; // <-- добавьте это
+            }
+            else {
+                flist->tail = newNode;
+            }
             target->next = newNode;
         }
-        break;
+        else {
+            // target не принадлежит списку, освобождаем память
+            delete newNode;
+            cout << "Ошибка: указанный узел не найден в списке" << endl;
+        }
+    }
+}
 
-    case BEFORETwo: // вставка до узла target
-        if (target != nullptr) {
+void addNodeBeforeTwo(ForwardListTwo* flist, DoublyNode* target, const string& num) {
+    if (target != nullptr && flist->head != nullptr) {
+        DoublyNode* newNode = new DoublyNode;
+        newNode->node = num;
+        newNode->next = nullptr;
+        newNode->prev = nullptr;
+
+        // Проверяем, что target действительно находится в списке
+        DoublyNode* current = flist->head;
+        bool targetFound = false;
+
+        while (current != nullptr) {
+            if (current == target) {
+                targetFound = true;
+                break;
+            }
+            current = current->next;
+        }
+
+        if (targetFound) {
+            // Вставляем перед target
             newNode->next = target;
             newNode->prev = target->prev;
+
             if (target->prev != nullptr) {
                 target->prev->next = newNode;
             }
@@ -65,94 +107,141 @@ void addNodeTwo(ForwardListTwo* flist, DoublyNode* target, const string& num, Po
             }
             target->prev = newNode;
         }
-        break;
+        else {
+            // target не принадлежит списку, освобождаем память
+            delete newNode;
+            cout << "Ошибка: указанный узел не найден в списке" << endl;
+        }
     }
 }
 
-void deleteNodeTwo(ForwardListTwo* flist, DoublyNode* target, const string& num, PositionTwo pos) {
-    DoublyNode* toDelete = nullptr;
 
-    switch (pos) {
-    case HEADTwo: // удаление начала
+
+void deleteNodeHeadTwo(ForwardListTwo* flist) {
+    if (flist->head != nullptr) {
+        DoublyNode* toDelete = flist->head;
+        flist->head = flist->head->next;
         if (flist->head != nullptr) {
-            toDelete = flist->head;
-            flist->head = flist->head->next;
-            if (flist->head != nullptr) {
-                flist->head->prev = nullptr;
-            }
-            else {
-                flist->tail = nullptr; // если список стал пустым
-            }
-            delete toDelete;
+            flist->head->prev = nullptr;
         }
-        break;
+        else {
+            flist->tail = nullptr;
+        }
+        delete toDelete;
+    }
+}
 
-    case TAILTwo: // удаление хвоста
+void deleteNodeTailTwo(ForwardListTwo* flist) {
+    if (flist->tail != nullptr) {
+        DoublyNode* toDelete = flist->tail;
+        flist->tail = flist->tail->prev;
         if (flist->tail != nullptr) {
-            toDelete = flist->tail;
-            flist->tail = flist->tail->prev;
-            if (flist->tail != nullptr) {
-                flist->tail->next = nullptr;
-            }
-            else {
-                flist->head = nullptr; // если список стал пустым
-            }
-            delete toDelete;
+            flist->tail->next = nullptr;
         }
-        break;
+        else {
+            flist->head = nullptr;
+        }
+        delete toDelete;
+    }
+}
 
-    case AFTERTwo: // удаление после узла target
-        if (target != nullptr && target->next != nullptr) {
-            toDelete = target->next;
+void deleteNodeAfterTwo(ForwardListTwo* flist, DoublyNode* target) {
+    if (target != nullptr && flist->head != nullptr) {
+        // Проверяем, что target действительно находится в списке
+        DoublyNode* current = flist->head;
+        bool targetFound = false;
+
+        while (current != nullptr) {
+            if (current == target) {
+                targetFound = true;
+                break;
+            }
+            current = current->next;
+        }
+
+        if (targetFound && target->next != nullptr) {
+            DoublyNode* toDelete = target->next;
             target->next = toDelete->next;
+
             if (toDelete->next != nullptr) {
                 toDelete->next->prev = target;
             }
             else {
-                flist->tail = target; // если удалили последний узел
+                flist->tail = target;
             }
             delete toDelete;
         }
-        break;
+    }
+}
 
-    case BEFORETwo: // удаление перед узлом target
-        if (target != nullptr && target->prev != nullptr) {
-            toDelete = target->prev;
+void deleteNodeBeforeTwo(ForwardListTwo* flist, DoublyNode* target) {
+    if (target != nullptr && flist->head != nullptr) {
+        // Проверяем, что target действительно находится в списке
+        DoublyNode* current = flist->head;
+        bool targetFound = false;
+
+        while (current != nullptr) {
+            if (current == target) {
+                targetFound = true;
+                break;
+            }
+            current = current->next;
+        }
+
+        if (targetFound && target->prev != nullptr) {
+            DoublyNode* toDelete = target->prev;
             target->prev = toDelete->prev;
+
             if (toDelete->prev != nullptr) {
                 toDelete->prev->next = target;
             }
             else {
-                flist->head = target; // если удалили первый узел
+                flist->head = target;
             }
             delete toDelete;
         }
-        break;
     }
 }
 
-bool deleteNodeIndexTwo(ForwardListTwo* flist, const string& num) {
+void deleteNodeTwo(ForwardListTwo* flist, DoublyNode* target, const string& num, PositionTwo pos) {
+    if (pos == HEADTwo) {
+        deleteNodeHeadTwo(flist);
+    }
+    else if (pos == TAILTwo) {
+        deleteNodeTailTwo(flist);
+    }
+    else if (pos == AFTERTwo) {
+        deleteNodeAfterTwo(flist, target);
+    }
+    else if (pos == BEFORETwo) {
+        deleteNodeBeforeTwo(flist, target);
+    }
+}
+
+bool deleteNodTwo(ForwardListTwo* flist, const string& num) {
     if (flist->head == nullptr) return false;
 
     DoublyNode* current = flist->head;
 
-    // ищем узел с нужным значением
     while (current != nullptr && current->node != num) {
         current = current->next;
     }
 
-    if (current == nullptr) return false; // узел не найден
+    if (current == nullptr) return false;
 
-    // удаляем current
-    if (current->prev != nullptr)
+    if (current->prev != nullptr) {
         current->prev->next = current->next;
-    else
-        flist->head = current->next; // если удаляем голову
+    }
+    else {
+        flist->head = current->next;
+    }
 
-    if (current->next != nullptr)
+    if (current->next != nullptr) {
         current->next->prev = current->prev;
-    else
-        flist->tail = current->prev; // если удаляем хвост
+    }
+    else {
+        flist->tail = current->prev;
+    }
 
     delete current;
     return true;
@@ -199,5 +288,34 @@ DoublyNode* getNodeByIndexTwo(ForwardListTwo& flist, int index) {
         currentIndex++;
     }
 
-    return nullptr; // индекс за пределами списка
+    return nullptr;
+}
+
+bool deleteNodeIndexTwo(ForwardListTwo* flist, const string& num) {
+    if (flist->head == nullptr) return false;
+
+    DoublyNode* current = flist->head;
+
+    while (current != nullptr && current->node != num) {
+        current = current->next;
+    }
+
+    if (current == nullptr) return false;
+
+    if (current->prev != nullptr) {
+        current->prev->next = current->next;
+    }
+    else {
+        flist->head = current->next;
+    }
+
+    if (current->next != nullptr) {
+        current->next->prev = current->prev;
+    }
+    else {
+        flist->tail = current->prev;
+    }
+
+    delete current;
+    return true;
 }

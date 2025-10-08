@@ -20,4 +20,4 @@ void set(Array& arr, int index, const std::string& value);
 int length(const Array& arr);
 void print(const Array& arr);
 int findInArray(const Array& arr, const std::string& value);
-#endif
+#endif  

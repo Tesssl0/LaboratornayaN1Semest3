@@ -1,6 +1,6 @@
 #include "file_operations.h"
 #include "command_interface.h" 
-
+#include "fullBinaryTree.h"
 // Базовые функции для работы с файлами
 void saveToFile(const string& filename, const string& data) {
     ofstream file(filename);
@@ -75,12 +75,16 @@ void loadNamedStacksFromFile(const string& filename) {
 
             if (stack) {
                 string value;
-                vector<string> values;
-                while (iss >> value) {
-                    values.push_back(value);
+                // Заменяем vector на массив
+                const int MAX_VALUES = 100;
+                string values[MAX_VALUES];
+                int valueCount = 0;
+
+                while (iss >> value && valueCount < MAX_VALUES) {
+                    values[valueCount++] = value;
                 }
 
-                for (int i = values.size() - 1; i >= 0; i--) {
+                for (int i = valueCount - 1; i >= 0; i--) {
                     stack->stack.push(values[i]);
                 }
             }
@@ -95,27 +99,35 @@ void saveNamedQueuesToFile(const string& filename) {
     if (!file.is_open()) return;
 
     for (int i = 0; i < namedQueuesCount; i++) {
-        if (namedQueues[i].used && namedQueues[i].queue) {
+        if (namedQueues[i].used) {
             file << "QUEUE " << namedQueues[i].name << " ";
 
-            Queue<string> tempQueue(100, true);
-            int queueSize = namedQueues[i].queue->getSize();
+            // Создаем временную очередь для сохранения порядка
+            Queue tempQueue;
+            initQueue(&tempQueue, true);
 
-            for (int j = 0; j < queueSize; j++) {
-                string value = namedQueues[i].queue->dequeue();
+            // Перемещаем элементы во временную очередь и записываем
+            while (!isEmpty(&namedQueues[i].queue)) {
+                string value = dequeue(&namedQueues[i].queue);
                 file << value << " ";
-                tempQueue.enqueue(value);
+                enqueue(&tempQueue, value);
             }
 
-            for (int j = 0; j < queueSize; j++) {
-                namedQueues[i].queue->enqueue(tempQueue.dequeue());
+            // Возвращаем элементы обратно
+            while (!isEmpty(&tempQueue)) {
+                string value = dequeue(&tempQueue);
+                enqueue(&namedQueues[i].queue, value);
             }
+
+            // Очищаем временную очередь
+            clearQueue(&tempQueue);
 
             file << endl;
         }
     }
     file.close();
 }
+
 
 // Загрузка именованных очередей
 void loadNamedQueuesFromFile(const string& filename) {
@@ -131,10 +143,13 @@ void loadNamedQueuesFromFile(const string& filename) {
             if (!queue) {
                 queue = createNewQueue(name);
             }
-            if (queue && queue->queue) {
+            if (queue) {
+                // Очищаем существующую очередь
+                clearQueue(&queue->queue);
+
                 string value;
                 while (iss >> value) {
-                    queue->queue->enqueue(value);
+                    enqueue(&queue->queue, value);
                 }
             }
         }
@@ -224,7 +239,7 @@ void loadNamedListsFromFile(const string& filename) {
 
             string value;
             while (iss >> value) {
-                addNode(&namedLists[namedListsCount].list, nullptr, value, TAIL);
+                addNodeTail(&namedLists[namedListsCount].list, value);
             }
 
             namedListsCount++;
@@ -271,7 +286,7 @@ void loadNamedListsTwoFromFile(const string& filename) {
 
             string value;
             while (iss >> value) {
-                addNodeTwo(&namedListsTwo[namedListsTwoCount].list, nullptr, value, TAILTwo);
+                addNodeTailTwo(&namedListsTwo[namedListsTwoCount].list, value);
             }
 
             namedListsTwoCount++;
@@ -280,6 +295,7 @@ void loadNamedListsTwoFromFile(const string& filename) {
     file.close();
 }
 
+// Сохранение именованных деревьев
 // Сохранение именованных деревьев
 void saveNamedTreesToFile(const string& filename) {
     ofstream file(filename + ".named_trees");
@@ -294,23 +310,46 @@ void saveNamedTreesToFile(const string& filename) {
                 continue;
             }
 
-            Queue<Node*> q(100, true);
-            q.enqueue(namedTrees[i].tree.root);
+            // Используем существующую функцию для обхода в ширину
+            // Создаем временный файл для сохранения BFS обхода
+            string tempFilename = "temp_bfs_output.txt";
+            ofstream tempFile(tempFilename);
+            if (!tempFile.is_open()) continue;
 
-            while (!q.isEmpty()) {
-                Node* temp = q.dequeue();
-                if (temp) {
-                    file << temp->data << " ";
-                    if (temp->left) q.enqueue(temp->left);
-                    if (temp->right) q.enqueue(temp->right);
+            // Сохраняем стандартный вывод
+            streambuf* oldCoutBuffer = cout.rdbuf();
+            // Перенаправляем вывод в файл
+            cout.rdbuf(tempFile.rdbuf());
+
+            // Выполняем BFS обход (функция printBFS выводит в cout)
+            printBFS(&namedTrees[i].tree);
+
+            // Восстанавливаем стандартный вывод
+            cout.rdbuf(oldCoutBuffer);
+            tempFile.close();
+
+            // Читаем данные из временного файла
+            ifstream tempInput(tempFilename);
+            string line;
+            if (getline(tempInput, line)) {
+                // Пропускаем префикс "Обход в ширину: "
+                size_t pos = line.find(": ");
+                if (pos != string::npos) {
+                    string bfsData = line.substr(pos + 2);
+                    file << bfsData;
                 }
             }
+            tempInput.close();
+
+            // Удаляем временный файл
+            remove(tempFilename.c_str());
 
             file << endl;
         }
     }
     file.close();
 }
+
 
 // Загрузка именованных деревьев
 void loadNamedTreesFromFile(const string& filename) {

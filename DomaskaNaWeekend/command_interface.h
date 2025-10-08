@@ -4,7 +4,6 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <vector>
 #include "file_operations.h"
 
 using namespace std;
@@ -24,13 +23,11 @@ struct NamedStack {
 // Структура для именованной очереди
 struct NamedQueue {
     string name;
-    Queue<string>* queue;  // Используем указатель
+    Queue queue;  // Используем обычную структуру, а не указатель
     bool used;
 
-    NamedQueue() : queue(nullptr), used(false) {}
-
-    ~NamedQueue() {
-        delete queue;
+    NamedQueue() : used(false) {
+        initQueue(&queue, true);  // Инициализируем очередь
     }
 };
 
@@ -76,8 +73,6 @@ struct NamedTree {
         tree.root = nullptr;
     }
 };
-
-
 
 // Объявления именованных структур
 extern NamedStack namedStacks[MAX_NAMED_STRUCTURES];
@@ -132,6 +127,16 @@ void NAMED_FFIND(const string& listName, const string& value);
 void NAMED_FCOUNT(const string& listName);
 void NAMED_PRINT_LIST(const string& listName);
 
+// Новые функции для односвязных списков без switch case
+void NAMED_FPUSH_HEAD(const string& listName, const string& value);
+void NAMED_FPUSH_TAIL(const string& listName, const string& value);
+void NAMED_FPUSH_AFTER(const string& listName, int targetIndex, const string& value);
+void NAMED_FPUSH_BEFORE(const string& listName, int targetIndex, const string& value);
+
+void NAMED_FPOP_HEAD(const string& listName);
+void NAMED_FPOP_TAIL(const string& listName);
+void NAMED_FPOP_AFTER(const string& listName, int targetIndex);
+void NAMED_FPOP_BEFORE(const string& listName, int targetIndex);
 
 // Функции для работы с именованными двусвязными списками
 void NAMED_LPUSH(const string& listName, const string& value, int position = -1);
@@ -142,13 +147,22 @@ void NAMED_LCOUNT(const string& listName);
 void NAMED_PRINT_LIST_TWO_REVERSE(const string& listName);
 void NAMED_PRINT_LIST_TWO(const string& listName);
 
+// Новые функции для двусвязных списков без switch case
+void NAMED_LPUSH_HEAD(const string& listName, const string& value);
+void NAMED_LPUSH_TAIL(const string& listName, const string& value);
+void NAMED_LPUSH_AFTER(const string& listName, int targetIndex, const string& value);
+void NAMED_LPUSH_BEFORE(const string& listName, int targetIndex, const string& value);
+
+void NAMED_LPOP_HEAD(const string& listName);
+void NAMED_LPOP_TAIL(const string& listName);
+void NAMED_LPOP_AFTER(const string& listName, int targetIndex);
+void NAMED_LPOP_BEFORE(const string& listName, int targetIndex);
 
 // Функции для работы с именованными деревьями
 void NAMED_TINSERT(const string& treeName, const string& value);
 void NAMED_TDEL(const string& treeName, const string& value);
 void NAMED_TGET(const string& treeName, const string& value);
 void NAMED_PRINT_TREE(const string& treeName);
-
 
 // Универсальная функция PRINT
 void PRINT(const string& structure);
@@ -170,6 +184,5 @@ NamedArray* createNewArray(const string& name);
 NamedList* createNewList(const string& name);
 NamedListTwo* createNewListTwo(const string& name);
 NamedTree* createNewTree(const string& name);
-
 
 #endif

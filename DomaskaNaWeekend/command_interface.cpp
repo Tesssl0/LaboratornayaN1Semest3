@@ -2,7 +2,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-
+#include "fullBinaryTree.h" 
 using namespace std;
 
 // Именованные структуры
@@ -124,10 +124,10 @@ NamedQueue* createNewQueue(const string& name) {
         return nullptr;
     }
 
-    // Явно создаем новую очередь через new
+    // Инициализируем очередь
     namedQueues[namedQueuesCount].name = name;
-    namedQueues[namedQueuesCount].queue = new Queue<string>(100, true);
     namedQueues[namedQueuesCount].used = true;
+    initQueue(&namedQueues[namedQueuesCount].queue, true);
 
     cout << "Создана новая очередь: " << name << endl;
     return &namedQueues[namedQueuesCount++];
@@ -286,14 +286,14 @@ void NAMED_QPUSH(const string& queueName, const string& value) {
         queue = createNewQueue(queueName);
         if (!queue) return;
     }
-    queue->queue->enqueue(value);  // Используем -> для указателя
+    enqueue(&queue->queue, value);  // Используем & для передачи указателя
     cout << "Добавлен элемент " << value << " в очередь " << queueName << endl;
 }
 
 void NAMED_QPOP(const string& queueName) {
     NamedQueue* queue = findQueueByName(queueName);
-    if (queue && !queue->queue->isEmpty()) {
-        string value = queue->queue->dequeue();
+    if (queue && !isEmpty(&queue->queue)) {
+        string value = dequeue(&queue->queue);
         cout << "Извлечен элемент " << value << " из очереди " << queueName << endl;
     }
     else {
@@ -303,14 +303,15 @@ void NAMED_QPOP(const string& queueName) {
 
 void NAMED_QGET(const string& queueName) {
     NamedQueue* queue = findQueueByName(queueName);
-    if (queue && !queue->queue->isEmpty()) {
-        string value = queue->queue->front();
+    if (queue && !isEmpty(&queue->queue)) {
+        string value = front(&queue->queue);
         cout << "Первый элемент очереди " << queueName << ": " << value << endl;
     }
     else {
         cout << "Очередь " << queueName << " не найдена или пуста" << endl;
     }
 }
+
 // === НОВЫЕ КОМАНДЫ ДЛЯ МАССИВОВ ===
 
 void NAMED_MADDAT(const string& arrayName, int index, const string& value) {
@@ -392,25 +393,33 @@ void NAMED_PRINT_QUEUE(const string& queueName) {
         return;
     }
 
-    if (queue->queue->isEmpty()) {
+    if (isEmpty(&queue->queue)) {
         cout << "Очередь " << queueName << ": пуста" << endl;
     }
     else {
-        Queue<string> tempQueue(100, true);
+        // Создаем временную очередь для вывода
+        Queue tempQueue;
+        initQueue(&tempQueue, true);
 
         cout << "Очередь " << queueName << ": (первый -> последний): ";
 
-        while (!queue->queue->isEmpty()) {
-            string value = queue->queue->dequeue();
+        // Перемещаем элементы во временную очередь и выводим
+        while (!isEmpty(&queue->queue)) {
+            string value = dequeue(&queue->queue);
             cout << value << " ";
-            tempQueue.enqueue(value);
+            enqueue(&tempQueue, value);
         }
 
         cout << endl;
 
-        while (!tempQueue.isEmpty()) {
-            queue->queue->enqueue(tempQueue.dequeue());
+        // Возвращаем элементы обратно
+        while (!isEmpty(&tempQueue)) {
+            string value = dequeue(&tempQueue);
+            enqueue(&queue->queue, value);
         }
+
+        // Очищаем временную очередь
+        clearQueue(&tempQueue);
     }
 }
 // === НОВЫЕ КОМАНДЫ ДЛЯ ОДНОСВЯЗНЫХ СПИСКОВ ===
@@ -581,6 +590,248 @@ void NAMED_PRINT_ARRAY(const string& arrayName) {
     print(array->array);
 }
 
+void NAMED_FPUSH_HEAD(const string& listName, const string& value) {
+    NamedList* list = findListByName(listName);
+    if (!list) {
+        list = createNewList(listName);
+        if (!list) return;
+    }
+    addNodeHead(&list->list, value);
+    cout << "Добавлен элемент " << value << " в начало списка " << listName << endl;
+}
+
+void NAMED_FPUSH_TAIL(const string& listName, const string& value) {
+    NamedList* list = findListByName(listName);
+    if (!list) {
+        list = createNewList(listName);
+        if (!list) return;
+    }
+    addNodeTail(&list->list, value);
+    cout << "Добавлен элемент " << value << " в конец списка " << listName << endl;
+}
+
+void NAMED_FPUSH_AFTER(const string& listName, int targetIndex, const string& value) {
+    NamedList* list = findListByName(listName);
+    if (!list) {
+        list = createNewList(listName);
+        if (!list) return;
+    }
+
+    linkedList* target = getNodeByIndex(list->list, targetIndex);
+    if (target) {
+        addNodeAfter(&list->list, target, value);
+        cout << "Добавлен элемент " << value << " после индекса " << targetIndex << " в списке " << listName << endl;
+    }
+    else {
+        cout << "Неверный индекс целевого узла" << endl;
+    }
+}
+
+void NAMED_FPUSH_BEFORE(const string& listName, int targetIndex, const string& value) {
+    NamedList* list = findListByName(listName);
+    if (!list) {
+        list = createNewList(listName);
+        if (!list) return;
+    }
+
+    linkedList* target = getNodeByIndex(list->list, targetIndex);
+    if (target) {
+        addNodeBefore(&list->list, target, value);
+        cout << "Добавлен элемент " << value << " до индекса " << targetIndex << " в списке " << listName << endl;
+    }
+    else {
+        cout << "Неверный индекс целевого узла" << endl;
+    }
+}
+
+void NAMED_FPOP_HEAD(const string& listName) {
+    NamedList* list = findListByName(listName);
+    if (list && list->list.head != nullptr) {
+        string value = list->list.head->node;
+        deleteNodeHead(&list->list);
+        cout << "Удален элемент " << value << " из начала списка " << listName << endl;
+    }
+    else {
+        cout << "Список " << listName << " не найден или пуст" << endl;
+    }
+}
+
+void NAMED_FPOP_TAIL(const string& listName) {
+    NamedList* list = findListByName(listName);
+    if (list && list->list.head != nullptr) {
+        // Находим последний элемент для вывода значения
+        linkedList* current = list->list.head;
+        while (current->next != nullptr) {
+            current = current->next;
+        }
+        string value = current->node;
+
+        deleteNodeTail(&list->list);
+        cout << "Удален элемент " << value << " из конца списка " << listName << endl;
+    }
+    else {
+        cout << "Список " << listName << " не найден или пуст" << endl;
+    }
+}
+
+void NAMED_FPOP_AFTER(const string& listName, int targetIndex) {
+    NamedList* list = findListByName(listName);
+    if (list) {
+        linkedList* target = getNodeByIndex(list->list, targetIndex);
+        if (target && target->next != nullptr) {
+            string value = target->next->node;
+            deleteNodeAfter(&list->list, target);
+            cout << "Удален элемент " << value << " после индекса " << targetIndex << " в списке " << listName << endl;
+        }
+        else {
+            cout << "Неверный индекс или нет следующего элемента" << endl;
+        }
+    }
+    else {
+        cout << "Список " << listName << " не найден" << endl;
+    }
+}
+
+void NAMED_FPOP_BEFORE(const string& listName, int targetIndex) {
+    NamedList* list = findListByName(listName);
+    if (list) {
+        linkedList* target = getNodeByIndex(list->list, targetIndex);
+        if (target && target != list->list.head) {
+            // Находим предыдущий элемент для вывода значения
+            linkedList* prev = list->list.head;
+            while (prev->next != target) {
+                prev = prev->next;
+            }
+            string value = prev->node;
+
+            deleteNodeBefore(&list->list, target);
+            cout << "Удален элемент " << value << " до индекса " << targetIndex << " в списке " << listName << endl;
+        }
+        else {
+            cout << "Неверный индекс или нет предыдущего элемента" << endl;
+        }
+    }
+    else {
+        cout << "Список " << listName << " не найден" << endl;
+    }
+}
+
+// === НОВЫЕ ФУНКЦИИ ДЛЯ ДВУСВЯЗНЫХ СПИСКОВ ===
+
+void NAMED_LPUSH_HEAD(const string& listName, const string& value) {
+    NamedListTwo* list = findListTwoByName(listName);
+    if (!list) {
+        list = createNewListTwo(listName);
+        if (!list) return;
+    }
+    addNodeHeadTwo(&list->list, value);
+    cout << "Добавлен элемент " << value << " в начало двусвязного списка " << listName << endl;
+}
+
+void NAMED_LPUSH_TAIL(const string& listName, const string& value) {
+    NamedListTwo* list = findListTwoByName(listName);
+    if (!list) {
+        list = createNewListTwo(listName);
+        if (!list) return;
+    }
+    addNodeTailTwo(&list->list, value);
+    cout << "Добавлен элемент " << value << " в конец двусвязного списка " << listName << endl;
+}
+
+void NAMED_LPUSH_AFTER(const string& listName, int targetIndex, const string& value) {
+    NamedListTwo* list = findListTwoByName(listName);
+    if (!list) {
+        list = createNewListTwo(listName);
+        if (!list) return;
+    }
+
+    DoublyNode* target = getNodeByIndexTwo(list->list, targetIndex);
+    if (target) {
+        addNodeAfterTwo(&list->list, target, value);
+        cout << "Добавлен элемент " << value << " после индекса " << targetIndex << " в двусвязном списке " << listName << endl;
+    }
+    else {
+        cout << "Неверный индекс целевого узла" << endl;
+    }
+}
+
+void NAMED_LPUSH_BEFORE(const string& listName, int targetIndex, const string& value) {
+    NamedListTwo* list = findListTwoByName(listName);
+    if (!list) {
+        list = createNewListTwo(listName);
+        if (!list) return;
+    }
+
+    DoublyNode* target = getNodeByIndexTwo(list->list, targetIndex);
+    if (target) {
+        addNodeBeforeTwo(&list->list, target, value);
+        cout << "Добавлен элемент " << value << " до индекса " << targetIndex << " в двусвязном списке " << listName << endl;
+    }
+    else {
+        cout << "Неверный индекс целевого узла" << endl;
+    }
+}
+
+void NAMED_LPOP_HEAD(const string& listName) {
+    NamedListTwo* list = findListTwoByName(listName);
+    if (list && list->list.head != nullptr) {
+        string value = list->list.head->node;
+        deleteNodeHeadTwo(&list->list);
+        cout << "Удален элемент " << value << " из начала двусвязного списка " << listName << endl;
+    }
+    else {
+        cout << "Двусвязный список " << listName << " не найден или пуст" << endl;
+    }
+}
+
+void NAMED_LPOP_TAIL(const string& listName) {
+    NamedListTwo* list = findListTwoByName(listName);
+    if (list && list->list.tail != nullptr) {
+        string value = list->list.tail->node;
+        deleteNodeTailTwo(&list->list);
+        cout << "Удален элемент " << value << " из конца двусвязного списка " << listName << endl;
+    }
+    else {
+        cout << "Двусвязный список " << listName << " не найден или пуст" << endl;
+    }
+}
+
+void NAMED_LPOP_AFTER(const string& listName, int targetIndex) {
+    NamedListTwo* list = findListTwoByName(listName);
+    if (list) {
+        DoublyNode* target = getNodeByIndexTwo(list->list, targetIndex);
+        if (target && target->next != nullptr) {
+            string value = target->next->node;
+            deleteNodeAfterTwo(&list->list, target);
+            cout << "Удален элемент " << value << " после индекса " << targetIndex << " в двусвязном списке " << listName << endl;
+        }
+        else {
+            cout << "Неверный индекс или нет следующего элемента" << endl;
+        }
+    }
+    else {
+        cout << "Двусвязный список " << listName << " не найден" << endl;
+    }
+}
+
+void NAMED_LPOP_BEFORE(const string& listName, int targetIndex) {
+    NamedListTwo* list = findListTwoByName(listName);
+    if (list) {
+        DoublyNode* target = getNodeByIndexTwo(list->list, targetIndex);
+        if (target && target->prev != nullptr) {
+            string value = target->prev->node;
+            deleteNodeBeforeTwo(&list->list, target);
+            cout << "Удален элемент " << value << " до индекса " << targetIndex << " в двусвязном списке " << listName << endl;
+        }
+        else {
+            cout << "Неверный индекс или нет предыдущего элемента" << endl;
+        }
+    }
+    else {
+        cout << "Двусвязный список " << listName << " не найден" << endl;
+    }
+}
+
 // Функции для работы с именованными односвязными списками
 void NAMED_FPUSH(const string& listName, const string& value, int position) {
     NamedList* list = findListByName(listName);
@@ -590,12 +841,14 @@ void NAMED_FPUSH(const string& listName, const string& value, int position) {
     }
 
     if (position == -1) {
-        addNode(&list->list, nullptr, value, TAIL);
+        // Добавляем в конец
+        addNodeTail(&list->list, value);
     }
     else {
+        // Добавляем после указанной позиции
         linkedList* target = getNodeByIndex(list->list, position);
         if (target) {
-            addNode(&list->list, target, value, AFTER);
+            addNodeAfter(&list->list, target, value);
         }
         else {
             cout << "Неверная позиция" << endl;
@@ -650,12 +903,14 @@ void NAMED_LPUSH(const string& listName, const string& value, int position) {
     }
 
     if (position == -1) {
-        addNodeTwo(&list->list, nullptr, value, TAILTwo);
+        // Добавляем в конец
+        addNodeTailTwo(&list->list, value);
     }
     else {
+        // Добавляем после указанной позиции
         DoublyNode* target = getNodeByIndexTwo(list->list, position);
         if (target) {
-            addNodeTwo(&list->list, target, value, AFTERTwo);
+            addNodeAfterTwo(&list->list, target, value);
         }
         else {
             cout << "Неверная позиция" << endl;
@@ -747,7 +1002,16 @@ void NAMED_TGET(const string& treeName, const string& value) {
         cout << "Дерево " << treeName << " не найдено" << endl;
     }
 }
+// Функция для проверки типа дерева
+void NAMED_CHECK_TREE_TYPE(const string& treeName) {
+    NamedTree* tree = findTreeByName(treeName);
+    if (!tree) {
+        cout << "Дерево " << treeName << " не найдено" << endl;
+        return;
+    }
 
+    checkTreeType(&tree->tree);
+}
 void NAMED_PRINT_TREE(const string& treeName) {
     NamedTree* tree = findTreeByName(treeName);
     if (!tree) {
@@ -772,15 +1036,7 @@ void NAMED_PRINT_TREE(const string& treeName) {
     cout << endl;
 
     cout << "BFS (обход в ширину): ";
-    Queue<Node*> q(100, true);
-    q.enqueue(tree->tree.root);
-    while (!q.isEmpty()) {
-        Node* temp = q.dequeue();
-        cout << temp->data << " ";
-        if (temp->left) q.enqueue(temp->left);
-        if (temp->right) q.enqueue(temp->right);
-    }
-    cout << endl;
+    printBFS(&tree->tree);  // Используем существующую функцию вместо прямого использования SimpleQueue
 }
 
 // Универсальная функция PRINT
@@ -1032,6 +1288,159 @@ void processCommand(const string& command) {
             cout << "Неверный формат команды: LPUSH <list_name> <value> [position]" << endl;
         }
     }
+    else if (cmd == "FPUSH_HEAD") {
+        string listName, value;
+        if (iss >> listName >> value) {
+            NAMED_FPUSH_HEAD(listName, value);
+        }
+        else {
+            cout << "Неверный формат команды: FPUSH_HEAD <list_name> <value>" << endl;
+        }
+    }
+    else if (cmd == "FPUSH_TAIL") {
+        string listName, value;
+        if (iss >> listName >> value) {
+            NAMED_FPUSH_TAIL(listName, value);
+        }
+        else {
+            cout << "Неверный формат команды: FPUSH_TAIL <list_name> <value>" << endl;
+        }
+    }
+    else if (cmd == "FPUSH_AFTER") {
+        string listName, value;
+        int targetIndex;
+        if (iss >> listName >> targetIndex >> value) {
+            NAMED_FPUSH_AFTER(listName, targetIndex, value);
+        }
+        else {
+            cout << "Неверный формат команды: FPUSH_AFTER <list_name> <target_index> <value>" << endl;
+        }
+    }
+    else if (cmd == "FPUSH_BEFORE") {
+        string listName, value;
+        int targetIndex;
+        if (iss >> listName >> targetIndex >> value) {
+            NAMED_FPUSH_BEFORE(listName, targetIndex, value);
+        }
+        else {
+            cout << "Неверный формат команды: FPUSH_BEFORE <list_name> <target_index> <value>" << endl;
+        }
+    }
+    else if (cmd == "FPOP_HEAD") {
+        string listName;
+        if (iss >> listName) {
+            NAMED_FPOP_HEAD(listName);
+        }
+        else {
+            cout << "Неверный формат команды: FPOP_HEAD <list_name>" << endl;
+        }
+    }
+    else if (cmd == "FPOP_TAIL") {
+        string listName;
+        if (iss >> listName) {
+            NAMED_FPOP_TAIL(listName);
+        }
+        else {
+            cout << "Неверный формат команды: FPOP_TAIL <list_name>" << endl;
+        }
+    }
+    else if (cmd == "FPOP_AFTER") {
+        string listName;
+        int targetIndex;
+        if (iss >> listName >> targetIndex) {
+            NAMED_FPOP_AFTER(listName, targetIndex);
+        }
+        else {
+            cout << "Неверный формат команды: FPOP_AFTER <list_name> <target_index>" << endl;
+        }
+    }
+    else if (cmd == "FPOP_BEFORE") {
+        string listName;
+        int targetIndex;
+        if (iss >> listName >> targetIndex) {
+            NAMED_FPOP_BEFORE(listName, targetIndex);
+        }
+        else {
+            cout << "Неверный формат команды: FPOP_BEFORE <list_name> <target_index>" << endl;
+        }
+    }
+
+    else if (cmd == "LPUSH_HEAD") {
+        string listName, value;
+        if (iss >> listName >> value) {
+            NAMED_LPUSH_HEAD(listName, value);
+        }
+        else {
+            cout << "Неверный формат команды: LPUSH_HEAD <list_name> <value>" << endl;
+        }
+    }
+    else if (cmd == "LPUSH_TAIL") {
+        string listName, value;
+        if (iss >> listName >> value) {
+            NAMED_LPUSH_TAIL(listName, value);
+        }
+        else {
+            cout << "Неверный формат команды: LPUSH_TAIL <list_name> <value>" << endl;
+        }
+    }
+    else if (cmd == "LPUSH_AFTER") {
+        string listName, value;
+        int targetIndex;
+        if (iss >> listName >> targetIndex >> value) {
+            NAMED_LPUSH_AFTER(listName, targetIndex, value);
+        }
+        else {
+            cout << "Неверный формат команды: LPUSH_AFTER <list_name> <target_index> <value>" << endl;
+        }
+    }
+    else if (cmd == "LPUSH_BEFORE") {
+        string listName, value;
+        int targetIndex;
+        if (iss >> listName >> targetIndex >> value) {
+            NAMED_LPUSH_BEFORE(listName, targetIndex, value);
+        }
+        else {
+            cout << "Неверный формат команды: LPUSH_BEFORE <list_name> <target_index> <value>" << endl;
+        }
+    }
+    else if (cmd == "LPOP_HEAD") {
+        string listName;
+        if (iss >> listName) {
+            NAMED_LPOP_HEAD(listName);
+        }
+        else {
+            cout << "Неверный формат команды: LPOP_HEAD <list_name>" << endl;
+        }
+    }
+    else if (cmd == "LPOP_TAIL") {
+        string listName;
+        if (iss >> listName) {
+            NAMED_LPOP_TAIL(listName);
+        }
+        else {
+            cout << "Неверный формат команды: LPOP_TAIL <list_name>" << endl;
+        }
+    }
+    else if (cmd == "LPOP_AFTER") {
+        string listName;
+        int targetIndex;
+        if (iss >> listName >> targetIndex) {
+            NAMED_LPOP_AFTER(listName, targetIndex);
+        }
+        else {
+            cout << "Неверный формат команды: LPOP_AFTER <list_name> <target_index>" << endl;
+        }
+    }
+    else if (cmd == "LPOP_BEFORE") {
+        string listName;
+        int targetIndex;
+        if (iss >> listName >> targetIndex) {
+            NAMED_LPOP_BEFORE(listName, targetIndex);
+        }
+        else {
+            cout << "Неверный формат команды: LPOP_BEFORE <list_name> <target_index>" << endl;
+        }
+    }
     else if (cmd == "LDEL") {
         string listName, value;
         if (iss >> listName >> value) {
@@ -1078,6 +1487,16 @@ void processCommand(const string& command) {
             cout << "Неверный формат команды: TGET <tree_name> <value>" << endl;
         }
     }
+    else if (cmd == "TCHECK") {
+        string treeName;
+        if (iss >> treeName) {
+            NAMED_CHECK_TREE_TYPE(treeName);
+        }
+        else {
+            cout << "Неверный формат команды: TCHECK <tree_name>" << endl;
+        }
+        }
+
     // В функции processCommand добавьте:
     else if (cmd == "FFIND") {
         string listName, value;
@@ -1087,47 +1506,47 @@ void processCommand(const string& command) {
         else {
             cout << "Неверный формат команды: FFIND <list_name> <value>" << endl;
         }
-        }
+    }
     else if (cmd == "FCOUNT") {
-            string listName;
-            if (iss >> listName) {
-                NAMED_FCOUNT(listName);
-            }
-            else {
-                cout << "Неверный формат команды: FCOUNT <list_name>" << endl;
-            }
-            }
+        string listName;
+        if (iss >> listName) {
+            NAMED_FCOUNT(listName);
+        }
+        else {
+            cout << "Неверный формат команды: FCOUNT <list_name>" << endl;
+        }
+    }
     else if (cmd == "LFIND") {
-                string listName, value;
-                if (iss >> listName >> value) {
-                    NAMED_LFIND(listName, value);
-                }
-                else {
-                    cout << "Неверный формат команды: LFIND <list_name> <value>" << endl;
-                }
-                }
+        string listName, value;
+        if (iss >> listName >> value) {
+            NAMED_LFIND(listName, value);
+        }
+        else {
+            cout << "Неверный формат команды: LFIND <list_name> <value>" << endl;
+        }
+    }
     else if (cmd == "LCOUNT") {
-                    string listName;
-                    if (iss >> listName) {
-                        NAMED_LCOUNT(listName);
-                    }
-                    else {
-                        cout << "Неверный формат команды: LCOUNT <list_name>" << endl;
-                    }
-                    }
+        string listName;
+        if (iss >> listName) {
+            NAMED_LCOUNT(listName);
+        }
+        else {
+            cout << "Неверный формат команды: LCOUNT <list_name>" << endl;
+        }
+    }
     else if (cmd == "LPRINT_REVERSE") {
-                        string listName;
-                        if (iss >> listName) {
-                            NAMED_PRINT_LIST_TWO_REVERSE(listName);
-                        }
-                        else {
-                            cout << "Неверный формат команды: LPRINT_REVERSE <list_name>" << endl;
-                        }
-                        }
+        string listName;
+        if (iss >> listName) {
+            NAMED_PRINT_LIST_TWO_REVERSE(listName);
+        }
+        else {
+            cout << "Неверный формат команды: LPRINT_REVERSE <list_name>" << endl;
+        }
+    }
     else if (cmd == "LIST") {
-                            LIST_STRUCTURES();
-                            }
-                            // В функции processCommand добавьте:
+        LIST_STRUCTURES();
+    }
+    // В функции processCommand добавьте:
     else if (cmd == "MADDAT") {
         string arrayName, value;
         int index;
@@ -1137,44 +1556,44 @@ void processCommand(const string& command) {
         else {
             cout << "Неверный формат команды: MADDAT <array_name> <index> <value>" << endl;
         }
-        }
+    }
     else if (cmd == "MSET") {
-            string arrayName, value;
-            int index;
-            if (iss >> arrayName >> index >> value) {
-                NAMED_MSET(arrayName, index, value);
-            }
-            else {
-                cout << "Неверный формат команды: MSET <array_name> <index> <value>" << endl;
-            }
-            }
+        string arrayName, value;
+        int index;
+        if (iss >> arrayName >> index >> value) {
+            NAMED_MSET(arrayName, index, value);
+        }
+        else {
+            cout << "Неверный формат команды: MSET <array_name> <index> <value>" << endl;
+        }
+    }
     else if (cmd == "MLENGTH") {
-                string arrayName;
-                if (iss >> arrayName) {
-                    NAMED_MLENGTH(arrayName);
-                }
-                else {
-                    cout << "Неверный формат команды: MLENGTH <array_name>" << endl;
-                }
-                }
+        string arrayName;
+        if (iss >> arrayName) {
+            NAMED_MLENGTH(arrayName);
+        }
+        else {
+            cout << "Неверный формат команды: MLENGTH <array_name>" << endl;
+        }
+    }
     else if (cmd == "MFIND") {
-                    string arrayName, value;
-                    if (iss >> arrayName >> value) {
-                        NAMED_MFIND(arrayName, value);
-                    }
-                    else {
-                        cout << "Неверный формат команды: MFIND <array_name> <value>" << endl;
-                    }
-                    }
+        string arrayName, value;
+        if (iss >> arrayName >> value) {
+            NAMED_MFIND(arrayName, value);
+        }
+        else {
+            cout << "Неверный формат команды: MFIND <array_name> <value>" << endl;
+        }
+    }
     else if (cmd == "MCREATE") {
-                        string arrayName;
-                        if (iss >> arrayName) {
-                            NAMED_MCREATE(arrayName);
-                        }
-                        else {
-                            cout << "Неверный формат команды: MCREATE <array_name>" << endl;
-                        }
-                        }
+        string arrayName;
+        if (iss >> arrayName) {
+            NAMED_MCREATE(arrayName);
+        }
+        else {
+            cout << "Неверный формат команды: MCREATE <array_name>" << endl;
+        }
+    }
     else if (cmd == "PRINT") {
         string type, name;
         if (iss >> type) {
@@ -1239,30 +1658,51 @@ void processCommand(const string& command) {
         cout << "  MLENGTH <array_name> - получить длину массива" << endl;
         cout << "  MFIND <array_name> <value> - найти элемент в массиве по значению" << endl;
         cout << "  MCREATE <array_name> - создать новый массив" << endl;
+
+        cout << "Односвязные списки:" << endl;
         cout << "  FPUSH <list_name> <value> [position] - добавить в односвязный список" << endl;
         cout << "  FDEL <list_name> <value> - удалить из односвязного списка по значению" << endl;
         cout << "  FGET <list_name> <index> - получить элемент односвязного списка по индексу" << endl;
         cout << "  FFIND <list_name> <value> - найти в односвязном списке по значению" << endl;
         cout << "  FCOUNT <list_name> - подсчитать элементы в односвязном списке" << endl;
+        cout << "  FPUSH_HEAD <list_name> <value> - добавить в начало списка" << endl;
+        cout << "  FPUSH_TAIL <list_name> <value> - добавить в конец списка" << endl;
+        cout << "  FPUSH_AFTER <list_name> <target_index> <value> - добавить после указанного индекса" << endl;
+        cout << "  FPUSH_BEFORE <list_name> <target_index> <value> - добавить до указанного индекса" << endl;
+        cout << "  FPOP_HEAD <list_name> - удалить из начала списка" << endl;
+        cout << "  FPOP_TAIL <list_name> - удалить из конца списка" << endl;
+        cout << "  FPOP_AFTER <list_name> <target_index> - удалить после указанного индекса" << endl;
+        cout << "  FPOP_BEFORE <list_name> <target_index> - удалить до указанного индекса" << endl;
+
+        cout << "Двусвязные списки:" << endl;
         cout << "  LPUSH <list_name> <value> [position] - добавить в двусвязный список" << endl;
         cout << "  LDEL <list_name> <value> - удалить из двусвязного списка по значению" << endl;
         cout << "  LGET <list_name> <index> - получить элемент двусвязного списка по индексу" << endl;
         cout << "  LFIND <list_name> <value> - найти в двусвязном списке по значению" << endl;
         cout << "  LCOUNT <list_name> - подсчитать элементы в двусвязном списке" << endl;
         cout << "  LPRINT_REVERSE <list_name> - вывести двусвязный список в обратном порядке" << endl;
+        cout << "  LPUSH_HEAD <list_name> <value> - добавить в начало двусвязного списка" << endl;
+        cout << "  LPUSH_TAIL <list_name> <value> - добавить в конец двусвязного списка" << endl;
+        cout << "  LPUSH_AFTER <list_name> <target_index> <value> - добавить после указанного индекса" << endl;
+        cout << "  LPUSH_BEFORE <list_name> <target_index> <value> - добавить до указанного индекса" << endl;
+        cout << "  LPOP_HEAD <list_name> - удалить из начала двусвязного списка" << endl;
+        cout << "  LPOP_TAIL <list_name> - удалить из конца двусвязного списка" << endl;
+        cout << "  LPOP_AFTER <list_name> <target_index> - удалить после указанного индекса" << endl;
+        cout << "  LPOP_BEFORE <list_name> <target_index> - удалить до указанного индекса" << endl;
+
+        cout << "Деревья:" << endl;
         cout << "  TINSERT <tree_name> <value> - добавить в дерево" << endl;
         cout << "  TDEL <tree_name> <value> - удалить из дерева" << endl;
         cout << "  TGET <tree_name> <value> - найти в дереве" << endl;
+        cout << "  TCHECK <tree_name> - проверить тип дерева (полное/строго полное)" << endl;
+
+        cout << "Системные команды:" << endl;
         cout << "  LIST - показать все именованные структуры" << endl;
         cout << "  PRINT <type> <name> - вывести именованную структуру (типы: S,Q,M,F,L,T)" << endl;
-        cout << "Системные команды:" << endl;
         cout << "  SAVE_ALL - сохранить все именованные данные" << endl;
         cout << "  LOAD_ALL - загрузить все именованные данные" << endl;
         cout << "  CLEAR_ALL - очистить все именованные данные" << endl;
         cout << "  EXIT/QUIT - выход (с автосохранением)" << endl;
         cout << "  HELP - показать эту справку" << endl;
-    }
-    else {
-        cout << "Неизвестная команда. Введите HELP для списка команд." << endl;
     }
 }

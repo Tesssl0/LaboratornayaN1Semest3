@@ -1,39 +1,46 @@
+#pragma once
 #ifndef FULLBINARYTREE_H
 #define FULLBINARYTREE_H
-
 #include <iostream>
 #include <string>
-#include "Queue.h"
+
 using namespace std;
 
-// Узел дерева
+// Структура узла дерева
 struct Node {
     string data;
     Node* left;
     Node* right;
+
+    Node(const string& value) : data(value), left(nullptr), right(nullptr) {}
 };
 
-// Полное бинарное дерево
+// Структура бинарного дерева
 struct fullBinaryTree {
     Node* root;
-    fullBinaryTree() { root = nullptr; }
+
+    fullBinaryTree() : root(nullptr) {}
 };
 
-// Используем шаблонную очередь для узлов дерева в ТИХОМ режиме
-typedef Queue<Node*> QueueTree;
-
-// Функции работы с деревом
+// Основные операции с деревом
 void insert(fullBinaryTree* tree, const string& value);
+void deleteNode(fullBinaryTree* tree, const string& value);
+Node* BFS(fullBinaryTree* tree, const string& value);
+
+// Обходы дерева
 void inorder(Node* node);
 void preorder(Node* node);
 void postorder(Node* node);
-Node* BFS(fullBinaryTree* tree, const string& value);
 void printBFS(fullBinaryTree* tree);
-void deleteNode(fullBinaryTree* tree, const string& value);
+
+// Очистка дерева
 void clearTree(Node* node);
 void clearFullBinaryTree(fullBinaryTree* tree);
-// Функции проверки на полное бинарное дерево
+
+// Проверка типов деревьев
 bool isCompleteBinaryTree(Node* root);
 bool isFullBinaryTree(Node* root);
 void checkTreeType(fullBinaryTree* tree);
+
+
 #endif

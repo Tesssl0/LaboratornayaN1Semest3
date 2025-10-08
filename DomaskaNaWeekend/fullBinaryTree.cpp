@@ -1,20 +1,96 @@
-#include "FullBinaryTree.h"
+#include "fullBinaryTree.h"
+#include <iostream>
+#include <string>
 
-// ----------------- Реализация дерева -----------------
+using namespace std;
+
+struct QueueNode {
+    Node* treeNode;
+    QueueNode* next;
+
+    QueueNode(Node* node) : treeNode(node), next(nullptr) {}
+};
+
+struct SimpleQueue {
+    QueueNode* front;
+    QueueNode* rear;
+    int size;
+
+    SimpleQueue() : front(nullptr), rear(nullptr), size(0) {}
+
+    ~SimpleQueue() {
+        while (!isEmpty()) {
+            dequeue();
+        }
+    }
+
+    void enqueue(Node* node) {
+        QueueNode* newNode = new QueueNode(node);
+        if (rear == nullptr) {
+            front = rear = newNode;
+        }
+        else {
+            rear->next = newNode;
+            rear = newNode;
+        }
+        size++;
+    }
+
+    Node* dequeue() {
+        if (front == nullptr) return nullptr;
+
+        QueueNode* temp = front;
+        Node* node = temp->treeNode;
+        front = front->next;
+
+        if (front == nullptr) {
+            rear = nullptr;
+        }
+
+        delete temp;
+        size--;
+        return node;
+    }
+
+    bool isEmpty() {
+        return front == nullptr;
+    }
+
+    int getSize() {
+        return size;
+    }
+};
+
+// Вставка элемента в дерево (уровень за уровнем)
 void insert(fullBinaryTree* tree, const string& value) {
-    Node* newNode = new Node{ value, nullptr, nullptr };
+    Node* newNode = new Node(value);
+
     if (!tree->root) {
         tree->root = newNode;
         return;
     }
-    QueueTree q(10, true);
+
+    SimpleQueue q;
     q.enqueue(tree->root);
+
     while (!q.isEmpty()) {
         Node* temp = q.dequeue();
-        if (!temp->left) { temp->left = newNode; return; }
-        else q.enqueue(temp->left);
-        if (!temp->right) { temp->right = newNode; return; }
-        else q.enqueue(temp->right);
+
+        if (!temp->left) {
+            temp->left = newNode;
+            return;
+        }
+        else {
+            q.enqueue(temp->left);
+        }
+
+        if (!temp->right) {
+            temp->right = newNode;
+            return;
+        }
+        else {
+            q.enqueue(temp->right);
+        }
     }
 }
 
@@ -31,6 +107,8 @@ void clearFullBinaryTree(fullBinaryTree* tree) {
     clearTree(tree->root);
     tree->root = nullptr;
 }
+
+// Симметричный обход (левый-корень-правый)
 void inorder(Node* node) {
     if (!node) return;
     inorder(node->left);
@@ -38,6 +116,7 @@ void inorder(Node* node) {
     inorder(node->right);
 }
 
+// Прямой обход (корень-левый-правый)
 void preorder(Node* node) {
     if (!node) return;
     cout << node->data << " ";
@@ -45,6 +124,7 @@ void preorder(Node* node) {
     preorder(node->right);
 }
 
+// Обратный обход (левый-правый-корень)
 void postorder(Node* node) {
     if (!node) return;
     postorder(node->left);
@@ -52,37 +132,50 @@ void postorder(Node* node) {
     cout << node->data << " ";
 }
 
+// Поиск в ширину (BFS)
 Node* BFS(fullBinaryTree* tree, const string& value) {
     if (!tree->root) return nullptr;
-    QueueTree q(10, true);
+
+    SimpleQueue q;
     q.enqueue(tree->root);
+
     while (!q.isEmpty()) {
         Node* temp = q.dequeue();
         if (temp->data == value) return temp;
+
         if (temp->left) q.enqueue(temp->left);
         if (temp->right) q.enqueue(temp->right);
     }
+
     return nullptr;
 }
 
+// Вывод дерева в ширину
 void printBFS(fullBinaryTree* tree) {
-    if (!tree->root) return;
-    QueueTree q(10, true);
+    if (!tree->root) {
+        cout << "Дерево пустое" << endl;
+        return;
+    }
+
+    SimpleQueue q;
     q.enqueue(tree->root);
+
     cout << "Обход в ширину: ";
     while (!q.isEmpty()) {
         Node* temp = q.dequeue();
         cout << temp->data << " ";
+
         if (temp->left) q.enqueue(temp->left);
         if (temp->right) q.enqueue(temp->right);
     }
     cout << endl;
 }
+
 // Проверка на полное бинарное дерево (Complete Binary Tree)
 bool isCompleteBinaryTree(Node* root) {
     if (!root) return true;
 
-    QueueTree q(100, true);
+    SimpleQueue q;
     q.enqueue(root);
     bool foundNull = false;
 
@@ -130,11 +223,10 @@ void checkTreeType(fullBinaryTree* tree) {
     bool full = isFullBinaryTree(tree->root);
 
     cout << "=== АНАЛИЗ ДЕРЕВА ===" << endl;
-    cout << "Количество узлов: ";
 
     // Подсчет узлов
     int count = 0;
-    QueueTree q(100, true);
+    SimpleQueue q;
     if (tree->root) q.enqueue(tree->root);
     while (!q.isEmpty()) {
         Node* temp = q.dequeue();
@@ -142,14 +234,14 @@ void checkTreeType(fullBinaryTree* tree) {
         if (temp->left) q.enqueue(temp->left);
         if (temp->right) q.enqueue(temp->right);
     }
-    cout << count << endl;
+    cout << "Количество узлов: " << count << endl;
 
-    cout << "Высота дерева: ";
     // Вычисление высоты
-    QueueTree q2(100, true);
     int height = 0;
     if (tree->root) {
+        SimpleQueue q2;
         q2.enqueue(tree->root);
+
         while (!q2.isEmpty()) {
             int levelSize = q2.getSize();
             for (int i = 0; i < levelSize; i++) {
@@ -160,15 +252,15 @@ void checkTreeType(fullBinaryTree* tree) {
             height++;
         }
     }
-    cout << height << endl;
+    cout << "Высота дерева: " << height << endl;
 
     cout << "Тип дерева: ";
     if (full) {
-        cout << "СТРОГО ПОЛНОЕ БИНАРНОЕ ДЕРЕВО" << endl;
+        cout << "СТРОГО ПОЛНОЕ БИНАРНОЕ ДЕРЕВО (Full/Strict Binary Tree)" << endl;
         cout << "- Каждый узел имеет 0 или 2 потомка" << endl;
     }
     else if (complete) {
-        cout << "ПОЛНОЕ БИНАРНОЕ ДЕРЕВО" << endl;
+        cout << "ПОЛНОЕ БИНАРНОЕ ДЕРЕВО (Complete Binary Tree)" << endl;
         cout << "- Все уровни полностью заполнены, кроме последнего" << endl;
         cout << "- Последний уровень заполнен слева направо" << endl;
     }
@@ -185,20 +277,30 @@ void checkTreeType(fullBinaryTree* tree) {
         cout << "Дерево является ИДЕАЛЬНЫМ бинарным деревом!" << endl;
     }
 }
+
+// Удаление узла из дерева
 void deleteNode(fullBinaryTree* tree, const string& value) {
     if (!tree->root) {
         cout << "Дерево пусто!" << endl;
         return;
     }
 
-    QueueTree q(10, true);
+    // Если удаляем корень и он единственный узел
+    if (tree->root->data == value && !tree->root->left && !tree->root->right) {
+        delete tree->root;
+        tree->root = nullptr;
+        cout << "Узел '" << value << "' удалён" << endl;
+        return;
+    }
+
+    SimpleQueue q;
     q.enqueue(tree->root);
 
     Node* target = nullptr;
     Node* last = nullptr;
-    Node* parentLast = nullptr;
+    Node* parentOfLast = nullptr;
 
-    // Ищем узел для удаления и последний узел
+    // Находим узел для удаления и последний узел
     while (!q.isEmpty()) {
         Node* temp = q.dequeue();
 
@@ -207,86 +309,33 @@ void deleteNode(fullBinaryTree* tree, const string& value) {
         }
 
         if (temp->left) {
-            parentLast = temp;
-            q.enqueue(temp->left);
+            parentOfLast = temp;
             last = temp->left;
+            q.enqueue(temp->left);
         }
         if (temp->right) {
-            parentLast = temp;
-            q.enqueue(temp->right);
+            parentOfLast = temp;
             last = temp->right;
+            q.enqueue(temp->right);
         }
     }
 
-    // Если узел не найден
     if (!target) {
-        cout << "Узел с данными '" << value << "' не найден" << endl;
+        cout << "Узел '" << value << "' не найден" << endl;
         return;
     }
 
-    // Если дерево состоит только из корня
-    if (tree->root == target && !tree->root->left && !tree->root->right) {
-        delete tree->root;
-        tree->root = nullptr;
-        cout << "Узел с данными '" << value << "' удалён" << endl;
-        return;
-    }
-
-    // Если удаляем последний узел
-    if (target == last) {
-        // Находим родителя последнего узла
-        QueueTree q2(10, true);
-        q2.enqueue(tree->root);
-        Node* parent = nullptr;
-
-        while (!q2.isEmpty()) {
-            Node* temp = q2.dequeue();
-            if (temp->left == last || temp->right == last) {
-                parent = temp;
-                break;
-            }
-            if (temp->left) q2.enqueue(temp->left);
-            if (temp->right) q2.enqueue(temp->right);
-        }
-
-        if (parent) {
-            if (parent->left == last) parent->left = nullptr;
-            else if (parent->right == last) parent->right = nullptr;
-        }
-        delete last;
-        cout << "Узел с данными '" << value << "' удалён" << endl;
-        return;
-    }
-
-    // Стандартный случай: заменяем данные и удаляем последний узел
+    // Заменяем данные целевого узла данными последнего узла
     target->data = last->data;
 
-    // Находим родителя последнего узла
-    QueueTree q3(10, true);
-    q3.enqueue(tree->root);
-    Node* parentOfLast = nullptr;
-
-    while (!q3.isEmpty()) {
-        Node* temp = q3.dequeue();
-        if (temp->left == last || temp->right == last) {
-            parentOfLast = temp;
-            break;
-        }
-        if (temp->left) q3.enqueue(temp->left);
-        if (temp->right) q3.enqueue(temp->right);
-    }
-
-    if (parentOfLast) {
-        if (parentOfLast->left == last) {
-            parentOfLast->left = nullptr;
-        }
-        else if (parentOfLast->right == last) {
-            parentOfLast->right = nullptr;
-        }
-        delete last;
-        cout << "Узел с данными '" << value << "' удалён" << endl;
+    // Удаляем последний узел
+    if (parentOfLast->left == last) {
+        parentOfLast->left = nullptr;
     }
     else {
-        cout << "Ошибка: не удалось найти родителя узла" << endl;
+        parentOfLast->right = nullptr;
     }
+
+    delete last;
+    cout << "Узел '" << value << "' удалён" << endl;
 }
