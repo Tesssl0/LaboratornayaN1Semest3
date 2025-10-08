@@ -355,8 +355,8 @@ func NAMED_PRINT_ARRAY(arrayName string) {
 	arr.Array.Print()
 }
 
-// Односвязный список
-func NAMED_FPUSH(listName, value string, position int) {
+// Односвязный список - отдельные команды для начала/конца
+func NAMED_FPUSH_HEAD(listName, value string) {
 	list := findListByName(listName)
 	if list == nil {
 		list = createNewList(listName)
@@ -364,18 +364,92 @@ func NAMED_FPUSH(listName, value string, position int) {
 			return
 		}
 	}
-	if position == -1 {
-		addNode(list.List, nil, value, TAIL)
-	} else {
-		target := getNodeByIndex(*list.List, position)
-		if target != nil {
-			addNode(list.List, target, value, AFTER)
-		} else {
-			fmt.Println("Неверная позиция")
+	addNodeHead(list.List, value)
+	fmt.Println("Добавлен элемент", value, "в начало односвязного списка", listName)
+}
+
+func NAMED_FPUSH_TAIL(listName, value string) {
+	list := findListByName(listName)
+	if list == nil {
+		list = createNewList(listName)
+		if list == nil {
 			return
 		}
 	}
-	fmt.Println("Добавлен элемент", value, "в односвязный список", listName)
+	addNodeTail(list.List, value)
+	fmt.Println("Добавлен элемент", value, "в конец односвязного списка", listName)
+}
+
+func NAMED_FPOP_HEAD(listName string) {
+	list := findListByName(listName)
+	if list != nil && list.List.head != nil {
+		val := list.List.head.node
+		deleteNodeHead(list.List)
+		fmt.Println("Удален элемент", val, "из начала односвязного списка", listName)
+	} else {
+		fmt.Println("Список", listName, "не найден или пуст")
+	}
+}
+
+func NAMED_FPOP_TAIL(listName string) {
+	list := findListByName(listName)
+	if list != nil && list.List.head != nil {
+		// Находим последний элемент
+		cur := list.List.head
+		for cur.next != nil {
+			cur = cur.next
+		}
+		val := cur.node
+		// Удаляем последний элемент
+		if list.List.head.next == nil {
+			// Только один элемент
+			list.List.head = nil
+		} else {
+			// Ищем предпоследний элемент
+			prev := list.List.head
+			for prev.next != nil && prev.next.next != nil {
+				prev = prev.next
+			}
+			prev.next = nil
+		}
+		fmt.Println("Удален элемент", val, "из конца односвязного списка", listName)
+	} else {
+		fmt.Println("Список", listName, "не найден или пуст")
+	}
+}
+
+func NAMED_FPUSH_AFTER(listName, value string, position int) {
+	list := findListByName(listName)
+	if list == nil {
+		list = createNewList(listName)
+		if list == nil {
+			return
+		}
+	}
+	target := getNodeByIndex(*list.List, position)
+	if target != nil {
+		addNodeAfter(list.List, target, value)
+		fmt.Println("Добавлен элемент", value, "после позиции", position, "в односвязном списке", listName)
+	} else {
+		fmt.Println("Неверная позиция")
+	}
+}
+
+func NAMED_FPUSH_BEFORE(listName, value string, position int) {
+	list := findListByName(listName)
+	if list == nil {
+		list = createNewList(listName)
+		if list == nil {
+			return
+		}
+	}
+	target := getNodeByIndex(*list.List, position)
+	if target != nil {
+		addNodeBefore(list.List, target, value)
+		fmt.Println("Добавлен элемент", value, "перед позицией", position, "в односвязном списке", listName)
+	} else {
+		fmt.Println("Неверная позиция")
+	}
 }
 
 func NAMED_FDEL(listName, value string) {
@@ -437,8 +511,8 @@ func NAMED_FCOUNT(listName string) {
 	}
 }
 
-// Двусвязный список
-func NAMED_LPUSH(listName, value string, position int) {
+// Двусвязный список - отдельные команды для начала/конца
+func NAMED_LPUSH_HEAD(listName, value string) {
 	list := findListTwoByName(listName)
 	if list == nil {
 		list = createNewListTwo(listName)
@@ -446,18 +520,76 @@ func NAMED_LPUSH(listName, value string, position int) {
 			return
 		}
 	}
-	if position == -1 {
-		addNodeTwo(list.List, nil, value, TAILTwo)
-	} else {
-		target := getNodeByIndexTwo(*list.List, position)
-		if target != nil {
-			addNodeTwo(list.List, target, value, AFTERTwo)
-		} else {
-			fmt.Println("Неверная позиция")
+	addNodeHeadTwo(list.List, value)
+	fmt.Println("Добавлен элемент", value, "в начало двусвязного списка", listName)
+}
+
+func NAMED_LPUSH_TAIL(listName, value string) {
+	list := findListTwoByName(listName)
+	if list == nil {
+		list = createNewListTwo(listName)
+		if list == nil {
 			return
 		}
 	}
-	fmt.Println("Добавлен элемент", value, "в двусвязный список", listName)
+	addNodeTailTwo(list.List, value)
+	fmt.Println("Добавлен элемент", value, "в конец двусвязного списка", listName)
+}
+
+func NAMED_LPOP_HEAD(listName string) {
+	list := findListTwoByName(listName)
+	if list != nil && list.List.head != nil {
+		val := list.List.head.node
+		deleteNodeHeadTwo(list.List)
+		fmt.Println("Удален элемент", val, "из начала двусвязного списка", listName)
+	} else {
+		fmt.Println("Список", listName, "не найден или пуст")
+	}
+}
+
+func NAMED_LPOP_TAIL(listName string) {
+	list := findListTwoByName(listName)
+	if list != nil && list.List.tail != nil {
+		val := list.List.tail.node
+		deleteNodeTailTwo(list.List)
+		fmt.Println("Удален элемент", val, "из конца двусвязного списка", listName)
+	} else {
+		fmt.Println("Список", listName, "не найден или пуст")
+	}
+}
+
+func NAMED_LPUSH_AFTER(listName, value string, position int) {
+	list := findListTwoByName(listName)
+	if list == nil {
+		list = createNewListTwo(listName)
+		if list == nil {
+			return
+		}
+	}
+	target := getNodeByIndexTwo(*list.List, position)
+	if target != nil {
+		addNodeAfterTwo(list.List, target, value)
+		fmt.Println("Добавлен элемент", value, "после позиции", position, "в двусвязном списке", listName)
+	} else {
+		fmt.Println("Неверная позиция")
+	}
+}
+
+func NAMED_LPUSH_BEFORE(listName, value string, position int) {
+	list := findListTwoByName(listName)
+	if list == nil {
+		list = createNewListTwo(listName)
+		if list == nil {
+			return
+		}
+	}
+	target := getNodeByIndexTwo(*list.List, position)
+	if target != nil {
+		addNodeBeforeTwo(list.List, target, value)
+		fmt.Println("Добавлен элемент", value, "перед позицией", position, "в двусвязном списке", listName)
+	} else {
+		fmt.Println("Неверная позиция")
+	}
 }
 
 func NAMED_LDEL(listName, value string) {
@@ -760,21 +892,57 @@ func processCommand(command string) {
 			return
 		}
 		NAMED_MCREATE(parts[1])
-	case "FPUSH":
-		// FPUSH <list_name> <value> [position]
-		t := strings.SplitN(command, " ", 4)
+	// Односвязные списки - отдельные команды
+	case "FPUSH_HEAD":
+		t := strings.SplitN(command, " ", 3)
 		if len(t) < 3 {
-			fmt.Println("Неверный формат команды: FPUSH <list_name> <value> [position]")
+			fmt.Println("Неверный формат команды: FPUSH_HEAD <list_name> <value>")
 			return
 		}
-		pos := -1
-		if len(t) == 4 {
-			n, err := strconv.Atoi(t[3])
-			if err == nil {
-				pos = n
-			}
+		NAMED_FPUSH_HEAD(t[1], t[2])
+	case "FPUSH_TAIL":
+		t := strings.SplitN(command, " ", 3)
+		if len(t) < 3 {
+			fmt.Println("Неверный формат команды: FPUSH_TAIL <list_name> <value>")
+			return
 		}
-		NAMED_FPUSH(t[1], t[2], pos)
+		NAMED_FPUSH_TAIL(t[1], t[2])
+	case "FPOP_HEAD":
+		if len(parts) < 2 {
+			fmt.Println("Неверный формат команды: FPOP_HEAD <list_name>")
+			return
+		}
+		NAMED_FPOP_HEAD(parts[1])
+	case "FPOP_TAIL":
+		if len(parts) < 2 {
+			fmt.Println("Неверный формат команды: FPOP_TAIL <list_name>")
+			return
+		}
+		NAMED_FPOP_TAIL(parts[1])
+	case "FPUSH_AFTER":
+		t := strings.SplitN(command, " ", 4)
+		if len(t) < 4 {
+			fmt.Println("Неверный формат команды: FPUSH_AFTER <list_name> <value> <position>")
+			return
+		}
+		pos, err := strconv.Atoi(t[3])
+		if err != nil {
+			fmt.Println("Неверная позиция")
+			return
+		}
+		NAMED_FPUSH_AFTER(t[1], t[2], pos)
+	case "FPUSH_BEFORE":
+		t := strings.SplitN(command, " ", 4)
+		if len(t) < 4 {
+			fmt.Println("Неверный формат команды: FPUSH_BEFORE <list_name> <value> <position>")
+			return
+		}
+		pos, err := strconv.Atoi(t[3])
+		if err != nil {
+			fmt.Println("Неверная позиция")
+			return
+		}
+		NAMED_FPUSH_BEFORE(t[1], t[2], pos)
 	case "FDEL":
 		if len(parts) < 3 {
 			fmt.Println("Неверный формат команды: FDEL <list_name> <value>")
@@ -804,21 +972,57 @@ func processCommand(command string) {
 			return
 		}
 		NAMED_FCOUNT(parts[1])
-	case "LPUSH":
-		// LPUSH <list_name> <value> [position]
-		t := strings.SplitN(command, " ", 4)
+	// Двусвязные списки - отдельные команды
+	case "LPUSH_HEAD":
+		t := strings.SplitN(command, " ", 3)
 		if len(t) < 3 {
-			fmt.Println("Неверный формат команды: LPUSH <list_name> <value> [position]")
+			fmt.Println("Неверный формат команды: LPUSH_HEAD <list_name> <value>")
 			return
 		}
-		pos := -1
-		if len(t) == 4 {
-			n, err := strconv.Atoi(t[3])
-			if err == nil {
-				pos = n
-			}
+		NAMED_LPUSH_HEAD(t[1], t[2])
+	case "LPUSH_TAIL":
+		t := strings.SplitN(command, " ", 3)
+		if len(t) < 3 {
+			fmt.Println("Неверный формат команды: LPUSH_TAIL <list_name> <value>")
+			return
 		}
-		NAMED_LPUSH(t[1], t[2], pos)
+		NAMED_LPUSH_TAIL(t[1], t[2])
+	case "LPOP_HEAD":
+		if len(parts) < 2 {
+			fmt.Println("Неверный формат команды: LPOP_HEAD <list_name>")
+			return
+		}
+		NAMED_LPOP_HEAD(parts[1])
+	case "LPOP_TAIL":
+		if len(parts) < 2 {
+			fmt.Println("Неверный формат команды: LPOP_TAIL <list_name>")
+			return
+		}
+		NAMED_LPOP_TAIL(parts[1])
+	case "LPUSH_AFTER":
+		t := strings.SplitN(command, " ", 4)
+		if len(t) < 4 {
+			fmt.Println("Неверный формат команды: LPUSH_AFTER <list_name> <value> <position>")
+			return
+		}
+		pos, err := strconv.Atoi(t[3])
+		if err != nil {
+			fmt.Println("Неверная позиция")
+			return
+		}
+		NAMED_LPUSH_AFTER(t[1], t[2], pos)
+	case "LPUSH_BEFORE":
+		t := strings.SplitN(command, " ", 4)
+		if len(t) < 4 {
+			fmt.Println("Неверный формат команды: LPUSH_BEFORE <list_name> <value> <position>")
+			return
+		}
+		pos, err := strconv.Atoi(t[3])
+		if err != nil {
+			fmt.Println("Неверная позиция")
+			return
+		}
+		NAMED_LPUSH_BEFORE(t[1], t[2], pos)
 	case "LDEL":
 		if len(parts) < 3 {
 			fmt.Println("Неверный формат команды: LDEL <list_name> <value>")
@@ -918,17 +1122,30 @@ func printHelp() {
 	fmt.Println("  MLENGTH <array_name> - получить длину массива")
 	fmt.Println("  MFIND <array_name> <value> - найти элемент в массиве по значению")
 	fmt.Println("  MCREATE <array_name> - создать новый массив")
-	fmt.Println("  FPUSH <list_name> <value> [position] - добавить в односвязный список")
-	fmt.Println("  FDEL <list_name> <value> - удалить из односвязного списка по значению")
-	fmt.Println("  FGET <list_name> <index> - получить элемент односвязного списка по индексу")
-	fmt.Println("  LPUSH <list_name> <value> [position] - добавить в двусвязный список")
-	fmt.Println("  LDEL <list_name> <value> - удалить из двусвязного списка по значению")
-	fmt.Println("  LGET <list_name> <index> - получить элемент двусвязного списка по индексу")
-	fmt.Println("  FFIND <list_name> <value> - найти в односвязном списке по значению")
-	fmt.Println("  FCOUNT <list_name> - подсчитать элементы в односвязном списке")
-	fmt.Println("  LFIND <list_name> <value> - найти в двусвязном списке по значению")
-	fmt.Println("  LCOUNT <list_name> - подсчитать элементы в двусвязном списке")
-	fmt.Println("  LPRINT_REVERSE <list_name> - вывести двусвязный список в обратном порядке")
+	// Односвязные списки
+	fmt.Println("  FPUSH_HEAD <list_name> <value> - добавить в начало односвязного списка")
+	fmt.Println("  FPUSH_TAIL <list_name> <value> - добавить в конец односвязного списка")
+	fmt.Println("  FPOP_HEAD <list_name> - удалить из начала односвязного списка")
+	fmt.Println("  FPOP_TAIL <list_name> - удалить из конца односвязного списка")
+	fmt.Println("  FPUSH_AFTER <list_name> <value> <position> - добавить после позиции")
+	fmt.Println("  FPUSH_BEFORE <list_name> <value> <position> - добавить перед позицией")
+	fmt.Println("  FDEL <list_name> <value> - удалить по значению")
+	fmt.Println("  FGET <list_name> <index> - получить по индексу")
+	fmt.Println("  FFIND <list_name> <value> - найти по значению")
+	fmt.Println("  FCOUNT <list_name> - подсчитать элементы")
+	// Двусвязные списки
+	fmt.Println("  LPUSH_HEAD <list_name> <value> - добавить в начало двусвязного списка")
+	fmt.Println("  LPUSH_TAIL <list_name> <value> - добавить в конец двусвязного списка")
+	fmt.Println("  LPOP_HEAD <list_name> - удалить из начала двусвязного списка")
+	fmt.Println("  LPOP_TAIL <list_name> - удалить из конца двусвязного списка")
+	fmt.Println("  LPUSH_AFTER <list_name> <value> <position> - добавить после позиции")
+	fmt.Println("  LPUSH_BEFORE <list_name> <value> <position> - добавить перед позицией")
+	fmt.Println("  LDEL <list_name> <value> - удалить по значению")
+	fmt.Println("  LGET <list_name> <index> - получить по индексу")
+	fmt.Println("  LFIND <list_name> <value> - найти по значению")
+	fmt.Println("  LCOUNT <list_name> - подсчитать элементы")
+	fmt.Println("  LPRINT_REVERSE <list_name> - вывести в обратном порядке")
+	// Системные команды
 	fmt.Println("  LIST - показать все именованные структуры")
 	fmt.Println("  PRINT <type> <name> - вывести именованную структуру (типы: S,Q,M,F,L)")
 	fmt.Println("  SAVE_ALL - сохранить все именованные данные")

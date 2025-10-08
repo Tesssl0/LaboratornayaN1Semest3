@@ -203,7 +203,8 @@ func loadNamedListsFromFile(base string) {
 			namedLists[namedListsCount].Used = true
 			namedLists[namedListsCount].List = NewForwardList()
 			for i := 2; i < len(tokens); i++ {
-				addNode(namedLists[namedListsCount].List, nil, tokens[i], TAIL)
+				// Используем отдельную функцию вместо addNode с TAIL
+				addNodeTail(namedLists[namedListsCount].List, tokens[i])
 			}
 			namedListsCount++
 		}
@@ -253,7 +254,8 @@ func loadNamedListsTwoFromFile(base string) {
 			namedListsTwo[namedListsTwoCount].Used = true
 			namedListsTwo[namedListsTwoCount].List = NewDoublyList()
 			for i := 2; i < len(tokens); i++ {
-				addNodeTwo(namedListsTwo[namedListsTwoCount].List, nil, tokens[i], TAILTwo)
+				// Используем отдельную функцию вместо addNodeTwo с TAILTwo
+				addNodeTailTwo(namedListsTwo[namedListsTwoCount].List, tokens[i])
 			}
 			namedListsTwoCount++
 		}

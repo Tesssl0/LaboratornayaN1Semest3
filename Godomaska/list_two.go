@@ -13,114 +13,107 @@ type ForwardListTwo struct {
 	tail *DoublyNode
 }
 
-type PositionTwo int
-
-const (
-	HEADTwo PositionTwo = iota
-	TAILTwo
-	AFTERTwo
-	BEFORETwo
-)
-
 func NewDoublyList() *ForwardListTwo {
 	return &ForwardListTwo{head: nil, tail: nil}
 }
 
-func addNodeTwo(flist *ForwardListTwo, target *DoublyNode, num string, pos PositionTwo) {
-	newNode := &DoublyNode{node: num, next: nil, prev: nil}
-
-	switch pos {
-	case HEADTwo:
-		newNode.next = flist.head
-		newNode.prev = nil
-		if flist.head != nil {
-			flist.head.prev = newNode
-		}
-		flist.head = newNode
-		if flist.tail == nil {
-			flist.tail = newNode
-		}
-	case TAILTwo:
-		newNode.prev = flist.tail
-		newNode.next = nil
-		if flist.tail != nil {
-			flist.tail.next = newNode
-		}
+func addNodeHeadTwo(flist *ForwardListTwo, num string) {
+	newNode := &DoublyNode{node: num, next: flist.head, prev: nil}
+	if flist.head != nil {
+		flist.head.prev = newNode
+	}
+	flist.head = newNode
+	if flist.tail == nil {
 		flist.tail = newNode
-		if flist.head == nil {
-			flist.head = newNode
-		}
-	case AFTERTwo:
-		if target != nil {
-			newNode.next = target.next
-			newNode.prev = target
-			if target.next != nil {
-				target.next.prev = newNode
-			} else {
-				flist.tail = newNode
-			}
-			target.next = newNode
-		}
-	case BEFORETwo:
-		if target != nil {
-			newNode.next = target
-			newNode.prev = target.prev
-			if target.prev != nil {
-				target.prev.next = newNode
-			} else {
-				flist.head = newNode
-			}
-			target.prev = newNode
-		}
 	}
 }
 
-func deleteNodeTwo(flist *ForwardListTwo, target *DoublyNode, num string, pos PositionTwo) {
-	var toDelete *DoublyNode
-
-	switch pos {
-	case HEADTwo:
-		if flist.head != nil {
-			toDelete = flist.head
-			flist.head = flist.head.next
-			if flist.head != nil {
-				flist.head.prev = nil
-			} else {
-				flist.tail = nil
-			}
-		}
-	case TAILTwo:
-		if flist.tail != nil {
-			toDelete = flist.tail
-			flist.tail = flist.tail.prev
-			if flist.tail != nil {
-				flist.tail.next = nil
-			} else {
-				flist.head = nil
-			}
-		}
-	case AFTERTwo:
-		if target != nil && target.next != nil {
-			toDelete = target.next
-			target.next = toDelete.next
-			if toDelete.next != nil {
-				toDelete.next.prev = target
-			} else {
-				flist.tail = target
-			}
-		}
-	case BEFORETwo:
-		if target != nil && target.prev != nil {
-			toDelete = target.prev
-			target.prev = toDelete.prev
-			if toDelete.prev != nil {
-				toDelete.prev.next = target
-			} else {
-				flist.head = target
-			}
-		}
+func addNodeTailTwo(flist *ForwardListTwo, num string) {
+	newNode := &DoublyNode{node: num, next: nil, prev: flist.tail}
+	if flist.tail != nil {
+		flist.tail.next = newNode
 	}
-	if toDelete != nil {
+	flist.tail = newNode
+	if flist.head == nil {
+		flist.head = newNode
+	}
+}
+
+func addNodeAfterTwo(flist *ForwardListTwo, target *DoublyNode, num string) {
+	if target != nil {
+		newNode := &DoublyNode{node: num, next: target.next, prev: target}
+		if target.next != nil {
+			target.next.prev = newNode
+		} else {
+			flist.tail = newNode
+		}
+		target.next = newNode
+	}
+}
+
+func addNodeBeforeTwo(flist *ForwardListTwo, target *DoublyNode, num string) {
+	if target != nil {
+		newNode := &DoublyNode{node: num, next: target, prev: target.prev}
+		if target.prev != nil {
+			target.prev.next = newNode
+		} else {
+			flist.head = newNode
+		}
+		target.prev = newNode
+	}
+}
+
+func deleteNodeHeadTwo(flist *ForwardListTwo) {
+	if flist.head != nil {
+		toDelete := flist.head
+		flist.head = flist.head.next
+		if flist.head != nil {
+			flist.head.prev = nil
+		} else {
+			flist.tail = nil
+		}
+		toDelete.next = nil
+		toDelete.prev = nil
+	}
+}
+
+func deleteNodeTailTwo(flist *ForwardListTwo) {
+	if flist.tail != nil {
+		toDelete := flist.tail
+		flist.tail = flist.tail.prev
+		if flist.tail != nil {
+			flist.tail.next = nil
+		} else {
+			flist.head = nil
+		}
+		toDelete.next = nil
+		toDelete.prev = nil
+	}
+}
+
+func deleteNodeAfterTwo(flist *ForwardListTwo, target *DoublyNode) {
+	if target != nil && target.next != nil {
+		toDelete := target.next
+		target.next = toDelete.next
+		if toDelete.next != nil {
+			toDelete.next.prev = target
+		} else {
+			flist.tail = target
+		}
+		toDelete.next = nil
+		toDelete.prev = nil
+	}
+}
+
+func deleteNodeBeforeTwo(flist *ForwardListTwo, target *DoublyNode) {
+	if target != nil && target.prev != nil {
+		toDelete := target.prev
+		target.prev = toDelete.prev
+		if toDelete.prev != nil {
+			toDelete.prev.next = target
+		} else {
+			flist.head = target
+		}
 		toDelete.next = nil
 		toDelete.prev = nil
 	}

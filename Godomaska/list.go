@@ -11,111 +11,103 @@ type ForwardList struct {
 	head *linkedList
 }
 
-type Position int
-
-const (
-	HEAD Position = iota
-	TAIL
-	AFTER
-	BEFORE
-)
-
 func NewForwardList() *ForwardList {
 	return &ForwardList{head: nil}
 }
 
-func addNode(flist *ForwardList, target *linkedList, num string, pos Position) {
-	newNode := &linkedList{node: num, next: nil}
+func addNodeHead(flist *ForwardList, num string) {
+	newNode := &linkedList{node: num, next: flist.head}
+	flist.head = newNode
+}
 
-	switch pos {
-	case HEAD:
-		newNode.next = flist.head
+func addNodeTail(flist *ForwardList, num string) {
+	newNode := &linkedList{node: num, next: nil}
+	if flist.head == nil {
 		flist.head = newNode
-	case TAIL:
-		if flist.head == nil {
-			flist.head = newNode
+	} else {
+		cur := flist.head
+		for cur.next != nil {
+			cur = cur.next
+		}
+		cur.next = newNode
+	}
+}
+
+func addNodeAfter(flist *ForwardList, target *linkedList, num string) {
+	if target != nil {
+		newNode := &linkedList{node: num, next: target.next}
+		target.next = newNode
+	}
+}
+
+func addNodeBefore(flist *ForwardList, target *linkedList, num string) {
+	if target != nil {
+		if target == flist.head {
+			addNodeHead(flist, num)
 		} else {
 			cur := flist.head
-			for cur.next != nil {
+			for cur != nil && cur.next != target {
 				cur = cur.next
 			}
-			cur.next = newNode
-		}
-	case AFTER:
-		if target != nil {
-			newNode.next = target.next
-			target.next = newNode
-		}
-	case BEFORE:
-		if target != nil {
-			if target == flist.head {
-				newNode.next = flist.head
-				flist.head = newNode
-			} else {
-				cur := flist.head
-				for cur != nil && cur.next != target {
-					cur = cur.next
-				}
-				if cur != nil && cur.next == target {
-					newNode.next = target
-					cur.next = newNode
-				}
+			if cur != nil && cur.next == target {
+				newNode := &linkedList{node: num, next: target}
+				cur.next = newNode
 			}
 		}
 	}
 }
 
-func deleteNode(flist *ForwardList, target *linkedList, num string, pos Position) {
-	var toDelete *linkedList
+func deleteNodeHead(flist *ForwardList) {
+	if flist.head != nil {
+		temp := flist.head
+		flist.head = flist.head.next
+		temp.next = nil
+	}
+}
 
-	switch pos {
-	case HEAD:
-		if flist.head != nil {
-			temp := flist.head
-			flist.head = flist.head.next
-			temp.next = nil
-		}
-	case TAIL:
-		if flist.head == nil {
+func deleteNodeTail(flist *ForwardList) {
+	if flist.head == nil {
+		return
+	}
+	if flist.head.next == nil {
+		flist.head = nil
+		return
+	}
+	cur := flist.head
+	for cur.next != nil && cur.next.next != nil {
+		cur = cur.next
+	}
+	cur.next = nil
+}
+
+func deleteNodeAfter(flist *ForwardList, target *linkedList) {
+	if target != nil && target.next != nil {
+		toDelete := target.next
+		target.next = toDelete.next
+		toDelete.next = nil
+	}
+}
+
+func deleteNodeBefore(flist *ForwardList, target *linkedList) {
+	if target != nil {
+		if target == flist.head {
 			return
 		}
-		if flist.head.next == nil {
-			flist.head = nil
-			return
-		}
+		prev := (*linkedList)(nil)
 		cur := flist.head
-		for cur.next != nil && cur.next.next != nil {
+		for cur != nil && cur != target {
+			prev = cur
 			cur = cur.next
 		}
-		cur.next = nil
-	case AFTER:
-		if target != nil && target.next != nil {
-			toDelete = target.next
-			target.next = toDelete.next
-			toDelete.next = nil
-		}
-	case BEFORE:
-		if target != nil {
-			if target == flist.head {
-				return
-			}
-			prev := (*linkedList)(nil)
-			cur := flist.head
-			for cur != nil && cur != target {
-				prev = cur
-				cur = cur.next
-			}
-			if prev != nil {
-				// find prev's prev
-				if prev == flist.head {
-					flist.head = target
-				} else {
-					pp := flist.head
-					for pp.next != prev {
-						pp = pp.next
-					}
-					pp.next = target
+		if prev != nil {
+			if prev == flist.head {
+				flist.head = target
+			} else {
+				pp := flist.head
+				for pp.next != prev {
+					pp = pp.next
 				}
+				pp.next = target
 			}
 		}
 	}
