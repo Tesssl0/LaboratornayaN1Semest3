@@ -22,8 +22,9 @@ struct fullBinaryTree {
     fullBinaryTree() : root(nullptr) {}
 };
 
+
 // Основные операции с деревом
-void insert(fullBinaryTree* tree, const string& value);
+void insertBinary(fullBinaryTree* tree, const string& value);
 void deleteNode(fullBinaryTree* tree, const string& value);
 Node* BFS(fullBinaryTree* tree, const string& value);
 
@@ -41,6 +42,6 @@ void clearFullBinaryTree(fullBinaryTree* tree);
 bool isCompleteBinaryTree(Node* root);
 bool isFullBinaryTree(Node* root);
 void checkTreeType(fullBinaryTree* tree);
-
-
+string getBFSAsString(fullBinaryTree* tree);
+string getInorderAsString(Node* node);
 #endif

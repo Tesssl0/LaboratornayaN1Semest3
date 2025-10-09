@@ -296,7 +296,7 @@ void loadNamedListsTwoFromFile(const string& filename) {
 }
 
 // Сохранение именованных деревьев
-// Сохранение именованных деревьев
+
 void saveNamedTreesToFile(const string& filename) {
     ofstream file(filename + ".named_trees");
     if (!file.is_open()) return;
@@ -305,51 +305,13 @@ void saveNamedTreesToFile(const string& filename) {
         if (namedTrees[i].used) {
             file << "TREE " << namedTrees[i].name << " ";
 
-            if (!namedTrees[i].tree.root) {
-                file << endl;
-                continue;
-            }
-
-            // Используем существующую функцию для обхода в ширину
-            // Создаем временный файл для сохранения BFS обхода
-            string tempFilename = "temp_bfs_output.txt";
-            ofstream tempFile(tempFilename);
-            if (!tempFile.is_open()) continue;
-
-            // Сохраняем стандартный вывод
-            streambuf* oldCoutBuffer = cout.rdbuf();
-            // Перенаправляем вывод в файл
-            cout.rdbuf(tempFile.rdbuf());
-
-            // Выполняем BFS обход (функция printBFS выводит в cout)
-            printBFS(&namedTrees[i].tree);
-
-            // Восстанавливаем стандартный вывод
-            cout.rdbuf(oldCoutBuffer);
-            tempFile.close();
-
-            // Читаем данные из временного файла
-            ifstream tempInput(tempFilename);
-            string line;
-            if (getline(tempInput, line)) {
-                // Пропускаем префикс "Обход в ширину: "
-                size_t pos = line.find(": ");
-                if (pos != string::npos) {
-                    string bfsData = line.substr(pos + 2);
-                    file << bfsData;
-                }
-            }
-            tempInput.close();
-
-            // Удаляем временный файл
-            remove(tempFilename.c_str());
-
-            file << endl;
+            // Используем inorder для сохранения (сохраняет порядок BST)
+            string treeData = getInorderAsString(namedTrees[i].tree.root);
+            file << treeData << endl;
         }
     }
     file.close();
 }
-
 
 // Загрузка именованных деревьев
 void loadNamedTreesFromFile(const string& filename) {
@@ -369,7 +331,8 @@ void loadNamedTreesFromFile(const string& filename) {
 
             string value;
             while (iss >> value) {
-                insert(&namedTrees[namedTreesCount].tree, value);
+                // Используем бинарную вставку вместо полного дерева
+                insertBinary(&namedTrees[namedTreesCount].tree, value);
             }
 
             namedTreesCount++;

@@ -5,14 +5,14 @@
 using namespace std;
 
 struct QueueNode {
-    Node* treeNode;
-    QueueNode* next;
+    Node* treeNode;      // указатель на узел дерева
+    QueueNode* next; // указатель на следующий узел в очереди
 
-    QueueNode(Node* node) : treeNode(node), next(nullptr) {}
+    QueueNode(Node* node) : treeNode(node), next(nullptr) {}    // Конструктор
 };
 
 struct SimpleQueue {
-    QueueNode* front;
+    QueueNode* front; 
     QueueNode* rear;
     int size;
 
@@ -62,7 +62,7 @@ struct SimpleQueue {
 };
 
 // Вставка элемента в дерево (уровень за уровнем)
-void insert(fullBinaryTree* tree, const string& value) {
+void insertBinary(fullBinaryTree* tree, const string& value) {
     Node* newNode = new Node(value);
 
     if (!tree->root) {
@@ -70,29 +70,62 @@ void insert(fullBinaryTree* tree, const string& value) {
         return;
     }
 
+    // Ищем место для вставки, сравнивая значения как ЧИСЛА
+    Node* current = tree->root;
+    Node* parent = nullptr;
+
+    while (current != nullptr) {
+        parent = current;
+
+        // Преобразуем строки в числа для сравнения
+        int valueNum = stoi(value);
+        int currentNum = stoi(current->data);
+
+        if (valueNum < currentNum) {
+            current = current->left;
+        }
+        else if (valueNum > currentNum) {
+            current = current->right;
+        }
+        else {
+            // Если значение уже существует, не добавляем дубликат
+            delete newNode;
+            return;
+        }
+    }
+
+    // Вставляем новый узел
+    int valueNum = stoi(value);
+    int parentNum = stoi(parent->data);
+
+    if (valueNum < parentNum) {
+        parent->left = newNode;
+    }
+    else {
+        parent->right = newNode;
+    }
+}
+string getBFSAsString(fullBinaryTree* tree) {
+    string result;
+    if (!tree->root) return result;
+
     SimpleQueue q;
     q.enqueue(tree->root);
 
     while (!q.isEmpty()) {
         Node* temp = q.dequeue();
+        result += temp->data + " ";
 
-        if (!temp->left) {
-            temp->left = newNode;
-            return;
-        }
-        else {
-            q.enqueue(temp->left);
-        }
-
-        if (!temp->right) {
-            temp->right = newNode;
-            return;
-        }
-        else {
-            q.enqueue(temp->right);
-        }
+        if (temp->left) q.enqueue(temp->left);
+        if (temp->right) q.enqueue(temp->right);
     }
+
+    if (!result.empty()) {
+        result.pop_back(); // Удаляем последний пробел
+    }
+    return result;
 }
+
 
 // Рекурсивная очистка дерева
 void clearTree(Node* node) {
@@ -182,36 +215,57 @@ bool isCompleteBinaryTree(Node* root) {
     while (!q.isEmpty()) {
         Node* temp = q.dequeue();
 
-        if (!temp) {
-            foundNull = true;
+        // Проверяем левого потомка
+        if (temp->left) {
+            if (foundNull) return false;  // Нашли узел после null
+            q.enqueue(temp->left);
         }
         else {
-            // Если мы уже нашли null-узел, но встречаем ненулевой - дерево не полное
-            if (foundNull) return false;
+            foundNull = true;
+        }
 
-            q.enqueue(temp->left);
+        // Проверяем правого потомка
+        if (temp->right) {
+            if (foundNull) return false;  // Нашли узел после null
             q.enqueue(temp->right);
+        }
+        else {
+            foundNull = true;
         }
     }
     return true;
 }
-
 // Проверка на строго полное бинарное дерево (Full/Strict Binary Tree)
 bool isFullBinaryTree(Node* root) {
     if (!root) return true;
 
-    // Если у узла нет детей - это лист, всё ок
+    // Если у узла нет детей - это лист
     if (!root->left && !root->right) return true;
 
-    // Если у узла оба ребенка - рекурсивно проверяем их
+    // Если у узла оба ребенка - проверяем рекурсивно
     if (root->left && root->right) {
         return isFullBinaryTree(root->left) && isFullBinaryTree(root->right);
     }
 
-    // Если только один ребенок - дерево не строго полное
+    // Если только один ребенок - не строго полное
     return false;
 }
+// Рекурсивная функция для получения inorder в виде строки
+void getInorderHelper(Node* node, string& result) {
+    if (!node) return;
+    getInorderHelper(node->left, result);
+    result += node->data + " ";
+    getInorderHelper(node->right, result);
+}
 
+string getInorderAsString(Node* node) {
+    string result;
+    getInorderHelper(node, result);
+    if (!result.empty()) {
+        result.pop_back(); // Удаляем последний пробел
+    }
+    return result;
+}
 // Функция для проверки и вывода типа дерева
 void checkTreeType(fullBinaryTree* tree) {
     if (!tree->root) {
@@ -255,12 +309,12 @@ void checkTreeType(fullBinaryTree* tree) {
     cout << "Высота дерева: " << height << endl;
 
     cout << "Тип дерева: ";
-    if (full) {
+    if (full) { 
         cout << "СТРОГО ПОЛНОЕ БИНАРНОЕ ДЕРЕВО (Full/Strict Binary Tree)" << endl;
         cout << "- Каждый узел имеет 0 или 2 потомка" << endl;
     }
     else if (complete) {
-        cout << "ПОЛНОЕ БИНАРНОЕ ДЕРЕВО (Complete Binary Tree)" << endl;
+        cout << "НЕ полное БИНАРНОЕ ДЕРЕВО (Complete Binary Tree)" << endl;
         cout << "- Все уровни полностью заполнены, кроме последнего" << endl;
         cout << "- Последний уровень заполнен слева направо" << endl;
     }
@@ -339,3 +393,19 @@ void deleteNode(fullBinaryTree* tree, const string& value) {
     delete last;
     cout << "Узел '" << value << "' удалён" << endl;
 }
+
+
+/*
+
+./dbms --file file.data --query "CLEAR_ALL"
+./dbms --file file.data --query "TINSERT_BINARY W 4"
+./dbms --file file.data --query "TINSERT_BINARY W 2"
+./dbms --file file.data --query "TINSERT_BINARY W 6"
+./dbms --file file.data --query "TINSERT_BINARY W 1"
+./dbms --file file.data --query "TINSERT_BINARY W 3"
+./dbms --file file.data --query "TINSERT_BINARY W 5"
+./dbms --file file.data --query "TINSERT_BINARY W 7"
+./dbms --file file.data --query "TCHECK W"
+./dbms --file file.data --query "PRINT T W"
+
+*/
