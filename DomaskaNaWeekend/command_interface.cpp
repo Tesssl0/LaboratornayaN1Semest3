@@ -129,7 +129,7 @@ NamedQueue* createNewQueue(const string& name) {
     namedQueues[namedQueuesCount].used = true;
     initQueue(&namedQueues[namedQueuesCount].queue, true);
 
-    cout << "Создана новая очередь: " << name << endl;
+    
     return &namedQueues[namedQueuesCount++];
 }
 
@@ -249,35 +249,42 @@ void NAMED_SGET(const string& stackName) {
 }
 
 void NAMED_PRINT_STACK(const string& stackName) {
-    NamedStack* stack = findStackByName(stackName);
-    if (!stack) {
+    NamedStack* namedStack = findStackByName(stackName);
+    if (!namedStack) {
         cout << "Стек " << stackName << " не найден" << endl;
         return;
     }
 
-    if (stack->stack.isEmpty()) {
+    if (namedStack->stack.isEmpty()) {
         cout << "Стек " << stackName << ": пуст" << endl;
+        return;
     }
-    else {
-        Stack tempStack(100, true);
-        Stack restoreStack(100, true);
 
-        cout << "Стек " << stackName << ": (нижний -> верхний): ";
+    cout << "Стек " << stackName << ": (нижний -> верхний): ";
 
-        while (!stack->stack.isEmpty()) {
-            string value = stack->stack.top();
-            cout << value << " ";
-            tempStack.push(value);
-            stack->stack.pop();
-        }
-
-        cout << endl;
-
-        while (!tempStack.isEmpty()) {
-            stack->stack.push(tempStack.top());
-            tempStack.pop();
-        }
+    Stack tempStack(100, true); // временный стек
+    // Переносим элементы в tempStack (реверс)
+    while (!namedStack->stack.isEmpty()) {
+        tempStack.push(namedStack->stack.top());
+        namedStack->stack.pop();
     }
+
+    // Выводим элементы и сразу возвращаем в исходный стек
+    Stack restoreStack(100, true);
+    while (!tempStack.isEmpty()) {
+        string val = tempStack.top();
+        cout << val << " ";
+        restoreStack.push(val);          // для восстановления исходного стека
+        tempStack.pop();
+    }
+
+    // Восстанавливаем исходный стек
+    while (!restoreStack.isEmpty()) {
+        namedStack->stack.push(restoreStack.top());
+        restoreStack.pop();
+    }
+
+    cout << endl;
 }
 
 void NAMED_QPUSH(const string& queueName, const string& value) {

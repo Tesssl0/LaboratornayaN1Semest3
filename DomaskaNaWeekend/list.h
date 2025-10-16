@@ -3,7 +3,7 @@
 
 #include <string>
 
-struct linkedList
+struct linkedList   
 {
     std::string node;
     linkedList* next;

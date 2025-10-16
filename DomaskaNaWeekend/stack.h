@@ -11,11 +11,16 @@ public:
     int topIndex;   // индекс вершины стека
     bool silent;    // флаг тихого режима
 
+
+
     // Конструктор
     Stack(int size, bool silentMode = false);
 
     // Конструктор копирования
     Stack(const Stack& other);
+
+    int getTopIndex() const { return topIndex; } // возвращает индекс вершины
+    std::string getAt(int index) const { return arr[index]; } // возвращает элемент по индексу
 
     // Оператор присваивания
     Stack& operator=(const Stack& other);

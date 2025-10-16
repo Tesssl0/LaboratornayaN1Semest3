@@ -28,37 +28,35 @@ void saveNamedStacksToFile(const string& filename) {
     if (!file.is_open()) return;
 
     for (int i = 0; i < namedStacksCount; i++) {
-        if (namedStacks[i].used) {
-            file << "STACK " << namedStacks[i].name << " ";
+        if (!namedStacks[i].used) continue;
 
-            Stack tempStack(100, true);
-            Stack restoreStack(100, true);
+        file << "STACK " << namedStacks[i].name << " ";
 
-            while (!namedStacks[i].stack.isEmpty()) {
-                string value = namedStacks[i].stack.top();
-                tempStack.push(value);
-                namedStacks[i].stack.pop();
-            }
+        Stack tempStack(100, true);
 
-            while (!tempStack.isEmpty()) {
-                string value = tempStack.top();
-                file << value << " ";
-                restoreStack.push(value);
-                tempStack.pop();
-            }
-
-            while (!restoreStack.isEmpty()) {
-                namedStacks[i].stack.push(restoreStack.top());
-                restoreStack.pop();
-            }
-
-            file << endl;
+        // Переносим элементы в tempStack, чтобы получить нижние элементы первыми
+        while (!namedStacks[i].stack.isEmpty()) {
+            tempStack.push(namedStacks[i].stack.top());
+            namedStacks[i].stack.pop();
         }
+
+        // Восстанавливаем стек и записываем в файл в правильном порядке
+        Stack restoreStack(100, true);
+        while (!tempStack.isEmpty()) {
+            string value = tempStack.top();
+            tempStack.pop();
+            file << value << " ";
+            namedStacks[i].stack.push(value); // восстановление исходного стека
+        }
+
+        file << endl;
     }
+
     file.close();
 }
 
-// Загрузка именованных стеков
+
+// Загрузка именованных стеков из файла
 void loadNamedStacksFromFile(const string& filename) {
     ifstream file(filename + ".named_stacks");
     if (!file.is_open()) return;
@@ -67,31 +65,33 @@ void loadNamedStacksFromFile(const string& filename) {
     while (getline(file, line)) {
         istringstream iss(line);
         string type, name;
-        if (iss >> type >> name && type == "STACK") {
-            NamedStack* stack = findStackByName(name);
-            if (!stack) {
-                stack = createNewStack(name);
-            }
+        if (!(iss >> type >> name) || type != "STACK") continue;
 
-            if (stack) {
-                string value;
-                // Заменяем vector на массив
-                const int MAX_VALUES = 100;
-                string values[MAX_VALUES];
-                int valueCount = 0;
+        // Ищем существующий стек или создаём новый
+        NamedStack* stack = findStackByName(name);
+        if (!stack) {
+            stack = createNewStack(name);
+        }
+        if (!stack) continue;
 
-                while (iss >> value && valueCount < MAX_VALUES) {
-                    values[valueCount++] = value;
-                }
+        // Считываем элементы в массив
+        const int MAX_VALUES = 100;
+        string values[MAX_VALUES];
+        int valueCount = 0;
+        string value;
+        while (iss >> value && valueCount < MAX_VALUES) {
+            values[valueCount++] = value;
+        }
 
-                for (int i = valueCount - 1; i >= 0; i--) {
-                    stack->stack.push(values[i]);
-                }
-            }
+        // Добавляем в стек в правильном порядке (нижний -> верхний)
+        for (int i = 0; i < valueCount; i++) {
+            stack->stack.push(values[i]);
         }
     }
+
     file.close();
 }
+
 
 // Сохранение именованных очередей
 void saveNamedQueuesToFile(const string& filename) {
