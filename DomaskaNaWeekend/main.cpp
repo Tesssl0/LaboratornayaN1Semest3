@@ -58,6 +58,7 @@ int main(int argc, char* argv[]) {
     SetConsoleOutputCP(1251);
     SetConsoleCP(1251);
 
+
     initGlobalStructures();
 
     // Режим командной строки

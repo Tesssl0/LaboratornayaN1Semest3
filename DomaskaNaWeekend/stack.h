@@ -4,7 +4,7 @@
 
 #include <string>
 
-class Stack {
+struct Stack {
 public:
     std::string* arr;       // массив для хранения элементов стека
     int capacity;   // максимальный размер стека

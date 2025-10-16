@@ -1,18 +1,19 @@
-#include "fullBinaryTree.h"
+п»ї#include "fullBinaryTree.h"
 #include <iostream>
-#include <string>
-
+#include <string>   
 using namespace std;
 
+// ======== РЎРўР РЈРљРўРЈР Рђ РЈР—Р›Рђ РћР§Р•Р Р•Р”Р ========
 struct QueueNode {
-    Node* treeNode;      // указатель на узел дерева
-    QueueNode* next; // указатель на следующий узел в очереди
+    Node* treeNode;
+    QueueNode* next;
 
-    QueueNode(Node* node) : treeNode(node), next(nullptr) {}    // Конструктор
+    QueueNode(Node* node) : treeNode(node), next(nullptr) {}
 };
 
+// ======== РџР РћРЎРўРђРЇ Р Р•РђР›РР—РђР¦РРЇ РћР§Р•Р Р•Р”Р ========
 struct SimpleQueue {
-    QueueNode* front; 
+    QueueNode* front;
     QueueNode* rear;
     int size;
 
@@ -61,50 +62,39 @@ struct SimpleQueue {
     }
 };
 
-// Вставка элемента в дерево (уровень за уровнем)
-void insertBinary(fullBinaryTree* tree, const string& value) {
-    Node* newNode = new Node(value);
-
-    if (!tree->root) {
-        tree->root = newNode;
+// ======== Р’РЎРўРђР’РљРђ Р’ Р‘РРќРђР РќРћР• Р”Р•Р Р•Р’Рћ РџРћРРЎРљРђ ========
+void insertBST(Node*& node, const string& value) {
+    if (!node) {
+        node = new Node(value);
         return;
     }
 
-    // Ищем место для вставки, сравнивая значения как ЧИСЛА
-    Node* current = tree->root;
-    Node* parent = nullptr;
+    // РџСЂРµРґРїРѕР»Р°РіР°РµРј, С‡С‚Рѕ Р·РЅР°С‡РµРЅРёСЏ - С‡РёСЃР»Р°
+    int newValue = stoi(value);
+    int nodeValue = stoi(node->data);
 
-    while (current != nullptr) {
-        parent = current;
+    if (newValue < nodeValue)
+        insertBST(node->left, value);
+    else if (newValue > nodeValue)
+        insertBST(node->right, value);
+    // Р•СЃР»Рё Р·РЅР°С‡РµРЅРёСЏ СЂР°РІРЅС‹, РјРѕР¶РЅРѕ РёРіРЅРѕСЂРёСЂРѕРІР°С‚СЊ РёР»Рё РѕР±СЂР°Р±РѕС‚Р°С‚СЊ РґСѓР±Р»РёРєР°С‚С‹
+}
 
-        // Преобразуем строки в числа для сравнения
-        int valueNum = stoi(value);
-        int currentNum = stoi(current->data);
+// РћР±РµСЂС‚РєР° РґР»СЏ СЂР°Р±РѕС‚С‹ СЃ РґРµСЂРµРІРѕРј
+void insertBST(fullBinaryTree* tree, const string& value) {
+    if (!tree) return;
 
-        if (valueNum < currentNum) {
-            current = current->left;
-        }
-        else if (valueNum > currentNum) {
-            current = current->right;
-        }
-        else {
-            // Если значение уже существует, не добавляем дубликат
-            delete newNode;
-            return;
-        }
+    try {
+        // РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ Р·РЅР°С‡РµРЅРёРµ РјРѕР¶РЅРѕ РїСЂРµРѕР±СЂР°Р·РѕРІР°С‚СЊ РІ С‡РёСЃР»Рѕ
+        stoi(value);
+        insertBST(tree->root, value);
     }
-
-    // Вставляем новый узел
-    int valueNum = stoi(value);
-    int parentNum = stoi(parent->data);
-
-    if (valueNum < parentNum) {
-        parent->left = newNode;
-    }
-    else {
-        parent->right = newNode;
+    catch (const exception& e) {
+        cout << "РћС€РёР±РєР°: Р·РЅР°С‡РµРЅРёРµ '" << value << "' РЅРµ СЏРІР»СЏРµС‚СЃСЏ С‡РёСЃР»РѕРј" << endl;
     }
 }
+
+// ======== РџРћР›РЈР§Р•РќРР• РћР‘РҐРћР”Рђ Р’ РЁРР РРќРЈ (BFS) Р’ Р’РР”Р• РЎРўР РћРљР ========
 string getBFSAsString(fullBinaryTree* tree) {
     string result;
     if (!tree->root) return result;
@@ -120,14 +110,11 @@ string getBFSAsString(fullBinaryTree* tree) {
         if (temp->right) q.enqueue(temp->right);
     }
 
-    if (!result.empty()) {
-        result.pop_back(); // Удаляем последний пробел
-    }
+    if (!result.empty()) result.pop_back();
     return result;
 }
 
-
-// Рекурсивная очистка дерева
+// ======== Р Р•РљРЈР РЎРР’РќРћР• РЈР”РђР›Р•РќРР• Р’РЎР•РҐ РЈР—Р›РћР’ Р”Р•Р Р•Р’Рђ ========
 void clearTree(Node* node) {
     if (node == nullptr) return;
     clearTree(node->left);
@@ -135,37 +122,35 @@ void clearTree(Node* node) {
     delete node;
 }
 
-// Очистка всего дерева
+// ======== РћР§РРЎРўРљРђ Р’РЎР•Р“Рћ Р”Р•Р Р•Р’Рђ ========
 void clearFullBinaryTree(fullBinaryTree* tree) {
     clearTree(tree->root);
     tree->root = nullptr;
 }
 
-// Симметричный обход (левый-корень-правый)
+// ======== РћР‘РҐРћР”Р« Р”Р•Р Р•Р’Рђ ========
 void inorder(Node* node) {
     if (!node) return;
     inorder(node->left);
-    cout << node->data << " ";
+    cout << node->data << " ";  
     inorder(node->right);
 }
 
-// Прямой обход (корень-левый-правый)
 void preorder(Node* node) {
     if (!node) return;
-    cout << node->data << " ";
+    cout << node->data << " "; 
     preorder(node->left);
     preorder(node->right);
 }
 
-// Обратный обход (левый-правый-корень)
 void postorder(Node* node) {
     if (!node) return;
     postorder(node->left);
     postorder(node->right);
-    cout << node->data << " ";
+    cout << node->data << " ";  // РРЎРџР РђР’Р›Р•РќРћ: data РІРјРµСЃС‚Рѕ value
 }
 
-// Поиск в ширину (BFS)
+// ======== РџРћРРЎРљ Р’ РЁРР РРќРЈ (BFS) ========
 Node* BFS(fullBinaryTree* tree, const string& value) {
     if (!tree->root) return nullptr;
 
@@ -174,29 +159,28 @@ Node* BFS(fullBinaryTree* tree, const string& value) {
 
     while (!q.isEmpty()) {
         Node* temp = q.dequeue();
-        if (temp->data == value) return temp;
+        if (temp->data == value) return temp;  // РРЎРџР РђР’Р›Р•РќРћ: data РІРјРµСЃС‚Рѕ value
 
         if (temp->left) q.enqueue(temp->left);
         if (temp->right) q.enqueue(temp->right);
     }
-
     return nullptr;
 }
 
-// Вывод дерева в ширину
+// ======== Р’Р«Р’РћР” Р’РЎР•Р“Рћ Р”Р•Р Р•Р’Рђ Р’ РЁРР РРќРЈ ========
 void printBFS(fullBinaryTree* tree) {
     if (!tree->root) {
-        cout << "Дерево пустое" << endl;
+        cout << "Р”РµСЂРµРІРѕ РїСѓСЃС‚РѕРµ" << endl;
         return;
     }
 
     SimpleQueue q;
     q.enqueue(tree->root);
 
-    cout << "Обход в ширину: ";
+    cout << "РћР±С…РѕРґ РІ С€РёСЂРёРЅСѓ: ";
     while (!q.isEmpty()) {
         Node* temp = q.dequeue();
-        cout << temp->data << " ";
+        cout << temp->data << " ";  // РРЎРџР РђР’Р›Р•РќРћ: data РІРјРµСЃС‚Рѕ value
 
         if (temp->left) q.enqueue(temp->left);
         if (temp->right) q.enqueue(temp->right);
@@ -204,7 +188,7 @@ void printBFS(fullBinaryTree* tree) {
     cout << endl;
 }
 
-// Проверка на полное бинарное дерево (Complete Binary Tree)
+// ======== РџР РћР’Р•Р РљРђ РќРђ РџРћР›РќРћР• Р‘РРќРђР РќРћР• Р”Р•Р Р•Р’Рћ ========
 bool isCompleteBinaryTree(Node* root) {
     if (!root) return true;
 
@@ -215,18 +199,16 @@ bool isCompleteBinaryTree(Node* root) {
     while (!q.isEmpty()) {
         Node* temp = q.dequeue();
 
-        // Проверяем левого потомка
         if (temp->left) {
-            if (foundNull) return false;  // Нашли узел после null
+            if (foundNull) return false;
             q.enqueue(temp->left);
         }
         else {
             foundNull = true;
         }
 
-        // Проверяем правого потомка
         if (temp->right) {
-            if (foundNull) return false;  // Нашли узел после null
+            if (foundNull) return false;
             q.enqueue(temp->right);
         }
         else {
@@ -235,50 +217,44 @@ bool isCompleteBinaryTree(Node* root) {
     }
     return true;
 }
-// Проверка на строго полное бинарное дерево (Full/Strict Binary Tree)
+
+// ======== РџР РћР’Р•Р РљРђ РќРђ РЎРўР РћР“Рћ РџРћР›РќРћР• Р”Р•Р Р•Р’Рћ ========
 bool isFullBinaryTree(Node* root) {
     if (!root) return true;
-
-    // Если у узла нет детей - это лист
     if (!root->left && !root->right) return true;
-
-    // Если у узла оба ребенка - проверяем рекурсивно
-    if (root->left && root->right) {
+    if (root->left && root->right)
         return isFullBinaryTree(root->left) && isFullBinaryTree(root->right);
-    }
-
-    // Если только один ребенок - не строго полное
     return false;
 }
-// Рекурсивная функция для получения inorder в виде строки
+
+// ======== РџРћР›РЈР§Р•РќРР• РћР‘РҐРћР”Рђ INORDER Р’ Р’РР”Р• РЎРўР РћРљР ========
 void getInorderHelper(Node* node, string& result) {
     if (!node) return;
     getInorderHelper(node->left, result);
-    result += node->data + " ";
+    result += node->data + " ";  
     getInorderHelper(node->right, result);
 }
 
 string getInorderAsString(Node* node) {
     string result;
     getInorderHelper(node, result);
-    if (!result.empty()) {
-        result.pop_back(); // Удаляем последний пробел
-    }
+    if (!result.empty()) result.pop_back();
     return result;
 }
-// Функция для проверки и вывода типа дерева
+
+// ======== РђРќРђР›РР— Р”Р•Р Р•Р’Рђ (РўРРџ, Р’Р«РЎРћРўРђ, РЈР—Р›Р«) ========
 void checkTreeType(fullBinaryTree* tree) {
     if (!tree->root) {
-        cout << "Дерево пустое" << endl;
+        cout << "The tree is empty" << endl;
         return;
     }
 
     bool complete = isCompleteBinaryTree(tree->root);
     bool full = isFullBinaryTree(tree->root);
 
-    cout << "=== АНАЛИЗ ДЕРЕВА ===" << endl;
+    cout << "=== TREE ANALYSIS ===" << endl;
 
-    // Подсчет узлов
+    // РџРѕРґСЃС‡РµС‚ РєРѕР»РёС‡РµСЃС‚РІР° СѓР·Р»РѕРІ
     int count = 0;
     SimpleQueue q;
     if (tree->root) q.enqueue(tree->root);
@@ -288,124 +264,43 @@ void checkTreeType(fullBinaryTree* tree) {
         if (temp->left) q.enqueue(temp->left);
         if (temp->right) q.enqueue(temp->right);
     }
-    cout << "Количество узлов: " << count << endl;
+    cout << "Number of nodes: " << count << endl;
 
-    // Вычисление высоты
+    // Р’С‹С‡РёСЃР»РµРЅРёРµ РІС‹СЃРѕС‚С‹ РґРµСЂРµРІР° (РїРѕ СѓСЂРѕРІРЅСЏРј)
     int height = 0;
     if (tree->root) {
         SimpleQueue q2;
         q2.enqueue(tree->root);
 
         while (!q2.isEmpty()) {
-            int levelSize = q2.getSize();
+            int levelSize = q2.size;
+            height++;
             for (int i = 0; i < levelSize; i++) {
                 Node* temp = q2.dequeue();
                 if (temp->left) q2.enqueue(temp->left);
                 if (temp->right) q2.enqueue(temp->right);
             }
-            height++;
         }
     }
-    cout << "Высота дерева: " << height << endl;
 
-    cout << "Тип дерева: ";
-    if (full) { 
-        cout << "СТРОГО ПОЛНОЕ БИНАРНОЕ ДЕРЕВО (Full/Strict Binary Tree)" << endl;
-        cout << "- Каждый узел имеет 0 или 2 потомка" << endl;
-    }
-    else if (complete) {
-        cout << "НЕ полное БИНАРНОЕ ДЕРЕВО (Complete Binary Tree)" << endl;
-        cout << "- Все уровни полностью заполнены, кроме последнего" << endl;
-        cout << "- Последний уровень заполнен слева направо" << endl;
+    cout << "Tree height: " << height << endl;
+
+    
+    cout << "Tree type: ";
+    if (full) {
+        cout << "Full Binary Tree" << endl;
     }
     else {
-        cout << "ОБЫЧНОЕ БИНАРНОЕ ДЕРЕВО" << endl;
-        cout << "- Не удовлетворяет критериям полного бинарного дерева" << endl;
+        cout << "Binary Tree" << endl;
+        cout << "- Does not meet the criteria for a full binary tree" << endl;
     }
 
-    // Дополнительная информация
-    cout << "Максимальное количество узлов для высоты " << height << ": " << ((1 << height) - 1) << endl;
-    cout << "Фактическое количество узлов: " << count << endl;
+    
+    cout << "Maximum possible nodes for height " << height << ": " << ((1 << height) - 1) << endl;
+    cout << "Actual number of nodes: " << count << endl;
 
     if (complete && count == ((1 << height) - 1)) {
-        cout << "Дерево является ИДЕАЛЬНЫМ бинарным деревом!" << endl;
+        cout << "The tree is a PERFECT binary tree!" << endl;
     }
 }
 
-// Удаление узла из дерева
-void deleteNode(fullBinaryTree* tree, const string& value) {
-    if (!tree->root) {
-        cout << "Дерево пусто!" << endl;
-        return;
-    }
-
-    // Если удаляем корень и он единственный узел
-    if (tree->root->data == value && !tree->root->left && !tree->root->right) {
-        delete tree->root;
-        tree->root = nullptr;
-        cout << "Узел '" << value << "' удалён" << endl;
-        return;
-    }
-
-    SimpleQueue q;
-    q.enqueue(tree->root);
-
-    Node* target = nullptr;
-    Node* last = nullptr;
-    Node* parentOfLast = nullptr;
-
-    // Находим узел для удаления и последний узел
-    while (!q.isEmpty()) {
-        Node* temp = q.dequeue();
-
-        if (temp->data == value) {
-            target = temp;
-        }
-
-        if (temp->left) {
-            parentOfLast = temp;
-            last = temp->left;
-            q.enqueue(temp->left);
-        }
-        if (temp->right) {
-            parentOfLast = temp;
-            last = temp->right;
-            q.enqueue(temp->right);
-        }
-    }
-
-    if (!target) {
-        cout << "Узел '" << value << "' не найден" << endl;
-        return;
-    }
-
-    // Заменяем данные целевого узла данными последнего узла
-    target->data = last->data;
-
-    // Удаляем последний узел
-    if (parentOfLast->left == last) {
-        parentOfLast->left = nullptr;
-    }
-    else {
-        parentOfLast->right = nullptr;
-    }
-
-    delete last;
-    cout << "Узел '" << value << "' удалён" << endl;
-}
-
-
-/*
-
-./dbms --file file.data --query "CLEAR_ALL"
-./dbms --file file.data --query "TINSERT_BINARY W 4"
-./dbms --file file.data --query "TINSERT_BINARY W 2"
-./dbms --file file.data --query "TINSERT_BINARY W 6"
-./dbms --file file.data --query "TINSERT_BINARY W 1"
-./dbms --file file.data --query "TINSERT_BINARY W 3"
-./dbms --file file.data --query "TINSERT_BINARY W 5"
-./dbms --file file.data --query "TINSERT_BINARY W 7"
-./dbms --file file.data --query "TCHECK W"
-./dbms --file file.data --query "PRINT T W"
-
-*/

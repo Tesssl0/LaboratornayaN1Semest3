@@ -305,8 +305,8 @@ void saveNamedTreesToFile(const string& filename) {
         if (namedTrees[i].used) {
             file << "TREE " << namedTrees[i].name << " ";
 
-            // Используем inorder для сохранения (сохраняет порядок BST)
-            string treeData = getInorderAsString(namedTrees[i].tree.root);
+            // Используем BFS (уровневый) для сохранения — совместимо с insertBinary
+            string treeData = getBFSAsString(&namedTrees[i].tree);
             file << treeData << endl;
         }
     }
@@ -325,14 +325,15 @@ void loadNamedTreesFromFile(const string& filename) {
         if (iss >> type >> name && type == "TREE") {
             if (namedTreesCount >= MAX_NAMED_STRUCTURES) continue;
 
+            // Сначала создаем пустое дерево
             namedTrees[namedTreesCount].name = name;
             namedTrees[namedTreesCount].used = true;
             namedTrees[namedTreesCount].tree.root = nullptr;
 
+            // Восстанавливаем дерево из BFS порядка, а не inorder
             string value;
             while (iss >> value) {
-                // Используем бинарную вставку вместо полного дерева
-                insertBinary(&namedTrees[namedTreesCount].tree, value);
+                insertBST(&namedTrees[namedTreesCount].tree, value);
             }
 
             namedTreesCount++;

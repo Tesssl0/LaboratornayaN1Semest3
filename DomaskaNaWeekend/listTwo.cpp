@@ -203,21 +203,6 @@ void deleteNodeBeforeTwo(ForwardListTwo* flist, DoublyNode* target) {
     }
 }
 
-void deleteNodeTwo(ForwardListTwo* flist, DoublyNode* target, const string& num, PositionTwo pos) {
-    if (pos == HEADTwo) {
-        deleteNodeHeadTwo(flist);
-    }
-    else if (pos == TAILTwo) {
-        deleteNodeTailTwo(flist);
-    }
-    else if (pos == AFTERTwo) {
-        deleteNodeAfterTwo(flist, target);
-    }
-    else if (pos == BEFORETwo) {
-        deleteNodeBeforeTwo(flist, target);
-    }
-}
-
 bool deleteNodTwo(ForwardListTwo* flist, const string& num) {
     if (flist->head == nullptr) return false;
 

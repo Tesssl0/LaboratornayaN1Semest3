@@ -957,35 +957,18 @@ void NAMED_PRINT_LIST_TWO(const string& listName) {
 }
 
 // Функции для работы с именованными деревьями
-void NAMED_TINSERT(const string& treeName, const string& value) {
+
+void NAMED_TINSERT_BINARY(const string& treeName, const string& value) {
     NamedTree* tree = findTreeByName(treeName);
     if (!tree) {
         tree = createNewTree(treeName);
         if (!tree) return;
     }
-    insert(&tree->tree, value);
-    cout << "Добавлен элемент " << value << " в дерево " << treeName << endl;
+    insertBST(&tree->tree, value);
+    cout << "Добавлен элемент " << value << " в бинарное дерево " << treeName << endl;
 }
 
-void NAMED_TDEL(const string& treeName, const string& value) {
-    NamedTree* tree = findTreeByName(treeName);
-    if (tree) {
-        try {
-            if (value.empty()) {
-                cout << "Ошибка: пустая строка для удаления" << endl;
-                return;
-            }
-            deleteNode(&tree->tree, value);
-            cout << "Удален элемент " << value << " из дерева " << treeName << endl;
-        }
-        catch (const exception& e) {
-            cout << "Ошибка при удалении из дерева: " << e.what() << endl;
-        }
-    }
-    else {
-        cout << "Дерево " << treeName << " не найдено" << endl;
-    }
-}
+
 
 void NAMED_TGET(const string& treeName, const string& value) {
     NamedTree* tree = findTreeByName(treeName);
@@ -1002,6 +985,7 @@ void NAMED_TGET(const string& treeName, const string& value) {
         cout << "Дерево " << treeName << " не найдено" << endl;
     }
 }
+
 // Функция для проверки типа дерева
 void NAMED_CHECK_TREE_TYPE(const string& treeName) {
     NamedTree* tree = findTreeByName(treeName);
@@ -1012,6 +996,7 @@ void NAMED_CHECK_TREE_TYPE(const string& treeName) {
 
     checkTreeType(&tree->tree);
 }
+
 void NAMED_PRINT_TREE(const string& treeName) {
     NamedTree* tree = findTreeByName(treeName);
     if (!tree) {
@@ -1019,24 +1004,26 @@ void NAMED_PRINT_TREE(const string& treeName) {
         return;
     }
 
-    cout << "=== ДЕРЕВО " << treeName << " ===" << endl;
+    cout << "=== " << treeName << " ===" << endl;
     if (!tree->tree.root) {
         cout << "Дерево пустое" << endl;
         return;
     }
 
-    cout << "Inorder (симметричный): ";
+    cout << "Inorder: ";
     inorder(tree->tree.root);
     cout << endl;
-    cout << "Preorder (прямой): ";
+
+    cout << "Preorder: ";
     preorder(tree->tree.root);
     cout << endl;
-    cout << "Postorder (обратный): ";
+
+    cout << "Postorder: ";
     postorder(tree->tree.root);
     cout << endl;
 
-    cout << "BFS (обход в ширину): ";
-    printBFS(&tree->tree);  // Используем существующую функцию вместо прямого использования SimpleQueue
+    cout << "BFS: ";
+    printBFS(&tree->tree);
 }
 
 // Универсальная функция PRINT
@@ -1460,24 +1447,17 @@ void processCommand(const string& command) {
             cout << "Неверный формат команды: LGET <list_name> <index>" << endl;
         }
     }
-    else if (cmd == "TINSERT") {
+    // Добавьте в блок обработки деревьев в processCommand
+    else if (cmd == "TINSERT_BINARY") {
         string treeName, value;
         if (iss >> treeName >> value) {
-            NAMED_TINSERT(treeName, value);
+            NAMED_TINSERT_BINARY(treeName, value);
         }
         else {
-            cout << "Неверный формат команды: TINSERT <tree_name> <value>" << endl;
+            cout << "Неверный формат команды: TINSERT_BINARY <tree_name> <value>" << endl;
         }
     }
-    else if (cmd == "TDEL") {
-        string treeName, value;
-        if (iss >> treeName >> value) {
-            NAMED_TDEL(treeName, value);
-        }
-        else {
-            cout << "Неверный формат команды: TDEL <tree_name> <value>" << endl;
-        }
-    }
+
     else if (cmd == "TGET") {
         string treeName, value;
         if (iss >> treeName >> value) {
@@ -1691,8 +1671,7 @@ void processCommand(const string& command) {
         cout << "  LPOP_BEFORE <list_name> <target_index> - удалить до указанного индекса" << endl;
 
         cout << "Деревья:" << endl;
-        cout << "  TINSERT <tree_name> <value> - добавить в дерево" << endl;
-        cout << "  TDEL <tree_name> <value> - удалить из дерева" << endl;
+        cout << "  TINSERT_BINARY <tree_name> <value> - добавить в бинарное дерево (сравнение значений)" << endl;
         cout << "  TGET <tree_name> <value> - найти в дереве" << endl;
         cout << "  TCHECK <tree_name> - проверить тип дерева (полное/строго полное)" << endl;
 

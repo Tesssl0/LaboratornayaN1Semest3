@@ -174,22 +174,6 @@ bool deleteNodeIndex(ForwardList* flist, const string& num) {
     return false;
 }
 
-
-void deleteNode(ForwardList* flist, linkedList* target, const string& num, Position pos) {
-    if (pos == HEAD) {
-        deleteNodeHead(flist);
-    }
-    else if (pos == TAIL) {
-        deleteNodeTail(flist);
-    }
-    else if (pos == AFTER) {
-        deleteNodeAfter(flist, target);
-    }
-    else if (pos == BEFORE) {
-        deleteNodeBefore(flist, target);
-    }
-}
-
 bool deleteNod(ForwardList* flist, const string& num) {
     linkedList* toDelete;
     linkedList* current = flist->head;

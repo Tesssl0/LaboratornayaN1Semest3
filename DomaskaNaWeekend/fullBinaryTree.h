@@ -8,24 +8,23 @@ using namespace std;
 
 // Структура узла дерева
 struct Node {
-    string data;
+    string data;  // ИСПРАВЛЕНО: было value, должно быть data
     Node* left;
     Node* right;
 
-    Node(const string& value) : data(value), left(nullptr), right(nullptr) {}
+    Node(const string& val) : data(val), left(nullptr), right(nullptr) {}  // ИСПРАВЛЕНО: data вместо value
 };
 
 // Структура бинарного дерева
 struct fullBinaryTree {
-    Node* root;
+    Node* root = nullptr;
 
+    // Добавляем конструктор по умолчанию
     fullBinaryTree() : root(nullptr) {}
 };
 
-
 // Основные операции с деревом
-void insertBinary(fullBinaryTree* tree, const string& value);
-void deleteNode(fullBinaryTree* tree, const string& value);
+void insertBST(fullBinaryTree* tree, const string& value);
 Node* BFS(fullBinaryTree* tree, const string& value);
 
 // Обходы дерева
@@ -44,4 +43,5 @@ bool isFullBinaryTree(Node* root);
 void checkTreeType(fullBinaryTree* tree);
 string getBFSAsString(fullBinaryTree* tree);
 string getInorderAsString(Node* node);
+
 #endif

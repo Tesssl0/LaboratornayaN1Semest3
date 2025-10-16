@@ -159,8 +159,7 @@ void NAMED_LPOP_AFTER(const string& listName, int targetIndex);
 void NAMED_LPOP_BEFORE(const string& listName, int targetIndex);
 
 // Функции для работы с именованными деревьями
-void NAMED_TINSERT(const string& treeName, const string& value);
-void NAMED_TDEL(const string& treeName, const string& value);
+void NAMED_TINSERT_BINARY(const string& treeName, const string& value);
 void NAMED_TGET(const string& treeName, const string& value);
 void NAMED_PRINT_TREE(const string& treeName);
 
